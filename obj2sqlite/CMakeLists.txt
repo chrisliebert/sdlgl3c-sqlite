@@ -1,0 +1,33 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+PROJECT(obj2sqlite)
+
+ADD_EXECUTABLE(obj2sqlite
+	dependencies/tinyobjloader/tiny_obj_loader.h
+	dependencies/tinyobjloader/tiny_obj_loader.cc
+	include/SceneBuilder.h
+	src/main.cpp
+	src/SceneBuilder.cpp
+)
+
+FIND_PACKAGE(SQLITE3 QUIET)
+
+IF(NOT SQLITE3_FOUND)
+    INCLUDE(FindPkgConfig)
+	PKG_SEARCH_MODULE(SQLITE3 REQUIRED sqlite3)
+ENDIF(NOT SQLITE3_FOUND)
+
+IF(NOT SQLITE3_FOUND)
+	MESSAGE(ERROR " SQLITE3 not found!")
+ENDIF(NOT SQLITE3_FOUND)
+
+INCLUDE_DIRECTORIES(include)
+INCLUDE_DIRECTORIES(dependencies/glm)
+INCLUDE_DIRECTORIES(dependencies/tinyobjloader)
+INCLUDE_DIRECTORIES(${SQLITE3_INCLUDE_DIRS})
+
+LINK_DIRECTORIES(${SQLITE3_LIBRARY_DIRS})
+
+ADD_DEFINITIONS(${SQLITE3_DEFINITIONS})
+
+TARGET_LINK_LIBRARIES(obj2sqlite ${SQLITE3_LIBRARIES} -lm)
