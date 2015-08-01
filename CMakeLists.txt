@@ -10,12 +10,14 @@ ADD_EXECUTABLE(sdlgl3c
 	include/Matrix.h
 	include/Renderer.h
 	include/Shader.h
+	include/Vec3.h
 	src/Camera.c
 	src/Frustum.c
 	src/main.c
 	src/Matrix.c
 	src/Renderer.c
 	src/Shader.c
+	src/Vec3.c
 )
 
 ADD_EXECUTABLE(sdlgl3c-test
@@ -25,12 +27,14 @@ ADD_EXECUTABLE(sdlgl3c-test
 	include/Matrix.h
 	include/Renderer.h
 	include/Shader.h
+	include/Vec3.h
 	src/Camera.c
 	src/Frustum.c
 	src/test.c
 	src/Matrix.c
 	src/Renderer.c
 	src/Shader.c
+	src/Vec3.c
 )
 
 

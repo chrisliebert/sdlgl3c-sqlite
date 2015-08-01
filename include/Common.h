@@ -14,6 +14,12 @@
 #define GLEW_STATIC 1
 #endif
 
+#ifdef _DEBUG
+#include <assert.h>
+#else
+#define assert(A) (void*)(0 * A)
+#endif // _DEBUG
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
