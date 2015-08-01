@@ -7,15 +7,11 @@ typedef struct SDLGLApp
     Camera camera;
     SDL_GLContext glContext;
     SDL_Event event;
-<<<<<<< HEAD
-=======
-
     float position[3];
     float direction[3];
     float right[3];
     float horizontalAngle;
     float verticalAngle;
->>>>>>> 4ee911a2a35be906a305309351bb94985a6ba82f
     float speed;
     float mouseSpeed;
     float deltaTime;
@@ -35,25 +31,12 @@ void errorMsg(const char* title)
 
 void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
 {
-<<<<<<< HEAD
-
-=======
-    app->position[0] = 0.f;
-    app->position[1] = 1.f;
-    app->position[2] = 5.f;
-    app->horizontalAngle = 3.14159f;
-    app->verticalAngle = 0.f;
-    app->speed = .001f;
->>>>>>> 4ee911a2a35be906a305309351bb94985a6ba82f
     app->mouseSpeed = 0.001f;
     app->runLevel = 1;
     app->lastTime = SDL_GetTicks();
     app->deltaTime = 0;
     app->window = 0;
-<<<<<<< HEAD
     app->speed = .001f;
-=======
->>>>>>> 4ee911a2a35be906a305309351bb94985a6ba82f
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
@@ -221,29 +204,17 @@ void SDLGLApp_start(SDLGLApp* app)
 
         if (keys[SDL_SCANCODE_S])
         {
-<<<<<<< HEAD
             Camera_moveBackward(&app->camera, app->deltaTime * app->speed);
-=======
-            Camera_moveForward(&app->camera, -1.0 * app->deltaTime * app->speed);
->>>>>>> 4ee911a2a35be906a305309351bb94985a6ba82f
         }
 
         if (keys[SDL_SCANCODE_D])
         {
-<<<<<<< HEAD
-=======
-            app->position[0] += app->deltaTime * app->speed;
->>>>>>> 4ee911a2a35be906a305309351bb94985a6ba82f
             Camera_moveRight(&app->camera, app->deltaTime * app->speed);
         }
 
         if (keys[SDL_SCANCODE_A])
         {
-<<<<<<< HEAD
             Camera_moveLeft(&app->camera, app->deltaTime * app->speed);
-=======
-            Camera_moveRight(&app->camera, -1.0 * app->deltaTime * app->speed);
->>>>>>> 4ee911a2a35be906a305309351bb94985a6ba82f
         }
 
         GLint viewport[4];
@@ -268,36 +239,8 @@ void SDLGLApp_start(SDLGLApp* app)
         double currentTime = SDL_GetTicks();
         app->deltaTime = (float) (currentTime - app->lastTime);
 
-<<<<<<< HEAD
         Camera_aim(&app->camera, app->mouseSpeed * app->deltaTime * (float) (width / 2 - xpos), app->mouseSpeed * app->deltaTime * (float) (height / 2 - ypos));
         Camera_update(&app->camera);
-=======
-        /* Compute new orientation */
-        app->horizontalAngle += app->mouseSpeed * app->deltaTime * (float) (width / 2 - xpos);
-        app->verticalAngle += app->mouseSpeed * app->deltaTime * (float) (height / 2 - ypos);
-
-        app->direction[0] = cos(app->verticalAngle) * sin(app->horizontalAngle);
-        app->direction[1] = sin(app->verticalAngle);
-        app->direction[2] = cos(app->verticalAngle) * cos(app->horizontalAngle);
-
-        /* Right vector */
-        app->right[0] = sin(app->horizontalAngle - 3.14f / 2.0f);
-        app->right[1] = 0;
-        app->right[2] = cos(app->horizontalAngle - 3.14f / 2.0f);
-
-        /* Up vector */
-
-        /* vec3 up = cross( right, direction ) */
-        /* TODO: implement cross-product routine */
-        float up[3];
-
-        up[0] = 0.f;
-        up[1] = 1.f;
-        up[2] = 0.f;
-
-        Matrix_lookAt(&app->camera.modelViewMatrix, app->position[0], app->position[1], app->position[2], app->position[0] + app->direction[0],
-                      app->position[1] + app->direction[1], app->position[2] + app->direction[2], up[0], up[1], up[2]);
->>>>>>> 4ee911a2a35be906a305309351bb94985a6ba82f
         app->lastTime = currentTime;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         Renderer_render(&app->renderer, &app->camera);
