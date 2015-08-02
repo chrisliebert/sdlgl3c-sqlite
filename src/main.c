@@ -59,7 +59,7 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
         Renderer_init(&app->renderer, dbFileName);
 
         Uint32 flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN; /* | SDL_WINDOW_FULLSCREEN; */
-        app->window = SDL_CreateWindow("", 30, 30, 1200, 800, flags);
+        app->window = SDL_CreateWindow("", 300, 100, 800, 600, flags);
         if (app->window == NULL)
         {
             fprintf(stderr, "Unable to create window: %s\n", SDL_GetError());
@@ -218,26 +218,40 @@ void SDLGLApp_start(SDLGLApp* app)
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        int width = viewport[2];
-        int height = viewport[3];
+        double width = (double)viewport[2];
+        double height = (double)viewport[3];
 
         /* Get mouse position */
         double xpos, ypos;
         int x, y;
         SDL_GetMouseState(&x, &y);
 
+
+        // Ignore mouse input less than 2 pixels from origin (smoothing)
+        if(abs(x - floor(viewport[2]/2.0)) < 2) x = floor(viewport[2]/2.0);
+        if(abs(y - floor(viewport[3]/2.0)) < 2) y = floor(viewport[3]/2.0);
+
+        //if(abs(x - viewport[2]) < 3) x = floor(width/2.0);
+        //if(abs(y - viewport[3]) < 3) y = floor(height/2.0);
+
         xpos = (double) x;
         ypos = (double) y;
 
         SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-        SDL_WarpMouseInWindow(app->window, width / 2, height / 2);
+        SDL_WarpMouseInWindow(app->window, (int)(width / 2.0),(int)(height / 2.0));
         SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
+
+
 
         /* Compute time difference between current and last frame */
         double currentTime = SDL_GetTicks();
         app->deltaTime = (float) (currentTime - app->lastTime);
 
-        Camera_aim(&app->camera, app->mouseSpeed * app->deltaTime * (float) (width / 2 - xpos), app->mouseSpeed * app->deltaTime * (float) (height / 2 - ypos));
+        //Log("%f,%f\n", xpos, ypos);
+
+
+        Camera_aim(&app->camera, app->mouseSpeed * (float) (floor(width / 2.0) - xpos), app->mouseSpeed * (float) (floor(height / 2.0) - ypos));
+
         Camera_update(&app->camera);
         app->lastTime = currentTime;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -248,12 +262,16 @@ void SDLGLApp_start(SDLGLApp* app)
 
 int main(int argc, char** argv)
 {
+    if(argc != 2) {
+        Log_error("Usage: %s <file.db>\n", argv[0]);
+        return 5;
+    }
     SDLGLApp* app = malloc(sizeof(SDLGLApp));
     char dbFile[100];
     dbFile[0] = '\0';
     strcat(dbFile, MODEL_DIRECTORY);
     strcat(dbFile, DIRECTORY_SEPARATOR);
-    strcat(dbFile, "sirus_city.db");
+    strcat(dbFile, argv[1]);
     SDLGLApp_init(app, dbFile);
     SDLGLApp_start(app);
     SDLGLApp_destroy(app);

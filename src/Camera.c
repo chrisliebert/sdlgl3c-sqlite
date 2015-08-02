@@ -18,10 +18,6 @@ void Camera_aim(Camera* camera, float x, float y)
 
     /* vec3 up = cross( right, direction ) */
     /* TODO: implement cross-product routine */
-
-
-    Matrix_lookAt(&camera->modelViewMatrix, camera->position[0], camera->position[1], camera->position[2], camera->position[0] + camera->direction[0],
-            camera->position[1] + camera->direction[1], camera->position[2] + camera->direction[2], camera->up[0], camera->up[1], camera->up[2]);
 }
 
 void Camera_init(Camera* camera)
@@ -34,7 +30,7 @@ void Camera_init(Camera* camera)
     camera->up[0] = 0.f;
     camera->up[1] = 1.f;
     camera->up[2] = 0.f;
-    camera->speed = 0.1f;
+    camera->speed = 0.005;
     /* Get viewport */
     GLint mViewport[4];
     glGetIntegerv( GL_VIEWPORT, mViewport);
@@ -46,6 +42,7 @@ void Camera_init(Camera* camera)
     /* setup modelview matrix (look down the negative z-axis) */
     Matrix_loadIdentity(&camera->modelViewMatrix);
     Camera_aim(camera, 0.f, 0.f);
+    Camera_update(camera);
 }
 
 void Camera_moveBackward(Camera* camera, float amount)
@@ -67,8 +64,6 @@ void Camera_moveLeft(Camera* camera, float amount)
 
 void Camera_moveRight(Camera* camera, float amount)
 {
-    //camera->position[0] += amount;
-    //position += right * deltaTime * speed;
     float* scaledRight = Vec3_scaled(camera->right, amount  * camera->speed);
     Vec3_add(camera->position, scaledRight, camera->position);
     free(scaledRight);

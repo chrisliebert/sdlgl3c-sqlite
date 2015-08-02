@@ -108,7 +108,25 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
 
             SDL_RWops *rw = 0;
             rw = SDL_RWFromMem( buffer, (sizeof(unsigned char) * sqlite3_column_bytes(pStmt, 0)) );
-            SDL_Surface* image = IMG_Load_RW(rw, 1);
+
+
+            //SDL_Surface* image = IMG_Load_RW(rw, 1);
+
+            //textureFileName
+            char fileExtension[4];
+            fileExtension[3] = '\0';
+            int exOffset = strlen(textureFileName) - 3;
+            const char* extensionPtr = &textureFileName[exOffset];
+            strncpy(&fileExtension, extensionPtr, 3);
+
+            //fix for .xv images
+            if(strcmp(fileExtension, ".xv") == 0) {
+                fileExtension[0] = 'x';
+                fileExtension[1] = 'v';
+                fileExtension[2] = '\0';
+            }
+
+            SDL_Surface* image = IMG_LoadTyped_RW(rw, 1, fileExtension);
 
             if (image == NULL)
             {
@@ -122,6 +140,7 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
             if (image->format->BytesPerPixel == 4)
             {
                 mode = GL_RGBA;
+                /* SDL_SetColorKey(image, SDL_RLEACCEL, image->format->colorkey   ); */
             }
             glTexImage2D(GL_TEXTURE_2D, 0, mode, image->w, image->h, 0, mode,
                          GL_UNSIGNED_BYTE, image->pixels);
