@@ -372,7 +372,8 @@ void Renderer_bufferToGPU(Renderer* renderer)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * renderer->numIndices, &renderer->indices[0], GL_STATIC_DRAW);
     VertexShader_init(&renderer->vertShader, "shaders/default.vert");
-    FragmentShader_init(&renderer->fragShader, "shaders/toon.frag");
+    //FragmentShader_init(&renderer->fragShader, "shaders/toon.frag");
+    FragmentShader_init(&renderer->fragShader, "shaders/default.frag");
     renderer->gpuProgram = glCreateProgram();
     glAttachShader(renderer->gpuProgram, renderer->vertShader.id);
     glAttachShader(renderer->gpuProgram, renderer->fragShader.id);

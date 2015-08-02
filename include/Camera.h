@@ -15,6 +15,7 @@ typedef struct Camera
     float up[3];
     float horizontalAngle;
     float verticalAngle;
+    float speed;
 } Camera;
 
 void Camera_aim(Camera* camera, float x, float y);

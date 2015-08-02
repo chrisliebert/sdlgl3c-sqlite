@@ -12,7 +12,6 @@ typedef struct SDLGLApp
     float right[3];
     float horizontalAngle;
     float verticalAngle;
-    float speed;
     float mouseSpeed;
     float deltaTime;
     int runLevel;
@@ -36,7 +35,6 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
     app->lastTime = SDL_GetTicks();
     app->deltaTime = 0;
     app->window = 0;
-    app->speed = .001f;
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
@@ -199,22 +197,22 @@ void SDLGLApp_start(SDLGLApp* app)
 
         if (keys[SDL_SCANCODE_W])
         {
-            Camera_moveForward(&app->camera, app->deltaTime * app->speed);
+            Camera_moveForward(&app->camera, app->deltaTime);
         }
 
         if (keys[SDL_SCANCODE_S])
         {
-            Camera_moveBackward(&app->camera, app->deltaTime * app->speed);
+            Camera_moveBackward(&app->camera, app->deltaTime);
         }
 
         if (keys[SDL_SCANCODE_D])
         {
-            Camera_moveRight(&app->camera, app->deltaTime * app->speed);
+            Camera_moveRight(&app->camera, app->deltaTime);
         }
 
         if (keys[SDL_SCANCODE_A])
         {
-            Camera_moveLeft(&app->camera, app->deltaTime * app->speed);
+            Camera_moveLeft(&app->camera, app->deltaTime);
         }
 
         GLint viewport[4];
@@ -255,7 +253,7 @@ int main(int argc, char** argv)
     dbFile[0] = '\0';
     strcat(dbFile, MODEL_DIRECTORY);
     strcat(dbFile, DIRECTORY_SEPARATOR);
-    strcat(dbFile, "portland.db");
+    strcat(dbFile, "sirus_city.db");
     SDLGLApp_init(app, dbFile);
     SDLGLApp_start(app);
     SDLGLApp_destroy(app);

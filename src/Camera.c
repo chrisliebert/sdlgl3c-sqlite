@@ -34,6 +34,7 @@ void Camera_init(Camera* camera)
     camera->up[0] = 0.f;
     camera->up[1] = 1.f;
     camera->up[2] = 0.f;
+    camera->speed = 0.1f;
     /* Get viewport */
     GLint mViewport[4];
     glGetIntegerv( GL_VIEWPORT, mViewport);
@@ -54,7 +55,7 @@ void Camera_moveBackward(Camera* camera, float amount)
 
 void Camera_moveForward(Camera* camera, float amount)
 {
-    float* scaledDirection = Vec3_scaled(camera->direction, amount);
+    float* scaledDirection = Vec3_scaled(camera->direction, amount * camera->speed);
     Vec3_add(camera->position, scaledDirection, camera->position);
     free(scaledDirection);
 }
@@ -68,7 +69,7 @@ void Camera_moveRight(Camera* camera, float amount)
 {
     //camera->position[0] += amount;
     //position += right * deltaTime * speed;
-    float* scaledRight = Vec3_scaled(camera->right, amount);
+    float* scaledRight = Vec3_scaled(camera->right, amount  * camera->speed);
     Vec3_add(camera->position, scaledRight, camera->position);
     free(scaledRight);
 }
