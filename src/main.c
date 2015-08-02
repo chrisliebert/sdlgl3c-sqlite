@@ -60,8 +60,8 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
         Renderer_init(&app->renderer, dbFileName);
 
-        Uint32 flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
-        app->window = SDL_CreateWindow("", 300, 100, 1200, 800, flags);
+        Uint32 flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN; /* | SDL_WINDOW_FULLSCREEN; */
+        app->window = SDL_CreateWindow("", 30, 30, 1200, 800, flags);
         if (app->window == NULL)
         {
             fprintf(stderr, "Unable to create window: %s\n", SDL_GetError());
@@ -79,7 +79,7 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
                 app->runLevel = 0;
                 return;
             }
-            /* This makes our buffer swap syncronized with the monitor's vertical refresh */
+            /* This makes our buffer swap syncronized with the monitor's vertical refresh (disabled for benchmarking) */
             SDL_GL_SetSwapInterval(0);
 
             /* Initialize GLEW */

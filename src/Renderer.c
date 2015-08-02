@@ -53,10 +53,9 @@ void Renderer_init(Renderer* renderer, const char* dbFileName)
     renderer->numMaterials = 0;
     renderer->materials = 0;
     renderer->dbFileName = 0;
-    renderer->dbFileName = malloc(strlen(dbFileName) * sizeof(char));
+    renderer->dbFileName = malloc((strlen(dbFileName) + 1) * sizeof(char));
     renderer->dbFileName[0] = '\0';
     strcpy(renderer->dbFileName, dbFileName);
-    /*Frustum_init(&renderer->frustum);*/
     Matrix_loadIdentity(&renderer->modelViewProjectionMatrix);
 }
 
@@ -68,6 +67,8 @@ void Renderer_destroy(Renderer* renderer)
         glDeleteBuffers(1, &renderer->ibo);
         glDeleteVertexArrays(1, &renderer->vao);
     }
+    FragmentShader_destroy(&renderer->fragShader);
+    VertexShader_destroy(&renderer->vertShader);
     if (renderer->vertexData && renderer->vertexDataSize > 0)
     {
         free(renderer->vertexData);
@@ -78,15 +79,14 @@ void Renderer_destroy(Renderer* renderer)
     }
     if (renderer->indices && renderer->numIndices > 0)
     {
-        free(renderer->indices);
+        /* free(renderer->indices); //Causes a crash */
     }
     if (renderer->materials && renderer->numMaterials > 0)
     {
         free(renderer->materials);
     }
+
     free(renderer->dbFileName);
-    FragmentShader_destroy(&renderer->fragShader);
-    VertexShader_destroy(&renderer->vertShader);
 }
 
 void addTexture(Renderer* renderer, const char* textureFileName, GLuint *textureId, sqlite3 *db)

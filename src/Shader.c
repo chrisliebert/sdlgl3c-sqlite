@@ -129,6 +129,6 @@ void Shader_init(Shader* shader, const char* filePath)
 void Shader_destroy(Shader* shader)
 {
     glDeleteShader(shader->id);
-    free((char*) shader->filePath);
+    //free((char*) shader->filePath);
     free((char*) shader->shaderSrc);
 }
