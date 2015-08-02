@@ -416,12 +416,14 @@ void Renderer_render(Renderer* renderer, Camera* camera)
     glBindBuffer(GL_ARRAY_BUFFER, renderer->vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->ibo);
 
+    /* Frustum_extractFrustum(&renderer->frustum, &camera->modelViewMatrix, &camera->projectionMatrix); */
+
     for (i = 0; i < renderer->numSceneNodes; i++)
     {
-        /* Frustum_extractFrustum(&renderer->frustum, &camera->modelViewMatrix, &camera->projectionMatrix); */
+
         /*
-         vec4 position(0.f, 0.f, 0.f, 1.f);
-         position = sceneNodes[i].modelViewMatrix * position;
+
+         position = load from db ()
 
          // Frustum culling test
          if(frustum.spherePartiallyInFrustum(position.x, position.y, position.z, sceneNodes[i].boundingSphere) > 0)

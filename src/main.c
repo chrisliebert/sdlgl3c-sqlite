@@ -97,7 +97,7 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
 #endif
             Renderer_buildScene(&app->renderer);
             Renderer_bufferToGPU(&app->renderer);
-            Log("OpenGL %s\n", glGetString(GL_VERSION));
+            /* Log("OpenGL %s\n", glGetString(GL_VERSION)); */
 
             int flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
             int initted = IMG_Init(flags);
