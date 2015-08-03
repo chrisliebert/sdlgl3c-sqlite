@@ -31,6 +31,9 @@ std::vector<unsigned char> readFile(const char* filename)
 {
     // open the file:
     std::ifstream file(filename, std::ios::binary);
+    if(!file.is_open()) {
+       cerr << "Unable to open " << filename << endl;
+    }
 
     // read the data:
     return std::vector<unsigned char>((std::istreambuf_iterator<char>(file)),
@@ -52,9 +55,10 @@ bool hasEnding (std::string const &fullString, std::string const &ending)
 
 void SceneBuilder::addTexture(const char* textureFileName, unsigned& textureId)
 {
-    std::string fileNameStr(TEXTURE_DIRECTORY);
-    fileNameStr += DIRECTORY_SEPARATOR;
-    fileNameStr += textureFileName;
+
+    //std::string fileNameStr(TEXTURE_DIRECTORY);
+    //fileNameStr += DIRECTORY_SEPARATOR;
+    //fileNameStr += textureFileName;
 
     std::map<std::string,int>::const_iterator it = textures.find(textureFileName);
 
@@ -257,8 +261,21 @@ void SceneBuilder::buildScene()
         }
         else
         {
-            if(strlen(materials[sceneNodes[i].material.c_str()].diffuseTexName) > 0)
+            if(strlen(materials[sceneNodes[i].material.c_str()].diffuseTexName) > 0) {
+
+                /* Check for paths that are not valid (unix support for paths with \ instead of / */
+#ifndef _WIN32
+
+                for(unsigned j=0; j<strlen(materials[sceneNodes[i].material.c_str()].diffuseTexName); j++)
+                {
+                    if(materials[sceneNodes[i].material.c_str()].diffuseTexName[j] == '\\') {
+                        materials[sceneNodes[i].material.c_str()].diffuseTexName[j] = '/';
+                    }
+                }
+#endif
+
                 addTexture(materials[sceneNodes[i].material.c_str()].diffuseTexName, sceneNodes[i].diffuseTextureId);
+            }
         }
     }
 
@@ -501,7 +518,6 @@ void SceneBuilder::saveToDB(const char* dbFile)
         sqlite3_bind_text(stmt, 1, it->first.c_str(), -1, SQLITE_STATIC);
         sqlite3_bind_blob(stmt, 2, zBlob, nBlob, SQLITE_STATIC);
 
-        //rc = sqlite3_exec(db, textureInsertSQL.c_str(), 0, 0, &error_msg);
         rc = sqlite3_step(stmt);
         assert( rc!=SQLITE_ROW );
         rc = sqlite3_finalize(stmt);

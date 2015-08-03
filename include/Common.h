@@ -33,7 +33,7 @@
 #include <SDL_opengl.h>
 #endif
 
-#define MODEL_DIRECTORY "models"
+#define MODEL_DIRECTORY "obj2sqlite"
 #define TEXTURE_DIRECTORY "textures"
 
 /* Cross-platform directory separator */

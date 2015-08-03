@@ -109,15 +109,12 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
             SDL_RWops *rw = 0;
             rw = SDL_RWFromMem( buffer, (sizeof(unsigned char) * sqlite3_column_bytes(pStmt, 0)) );
 
-
-            //SDL_Surface* image = IMG_Load_RW(rw, 1);
-
             //textureFileName
             char fileExtension[4];
             fileExtension[3] = '\0';
             int exOffset = strlen(textureFileName) - 3;
             const char* extensionPtr = &textureFileName[exOffset];
-            strncpy(&fileExtension, extensionPtr, 3);
+            strncpy(&fileExtension[0], extensionPtr, 3);
 
             //fix for .xv images
             if(strcmp(fileExtension, ".xv") == 0) {
