@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-PROJECT(sdlgl3c)
 PROJECT(sdlgl3c-test)
+PROJECT(sdlgl3c)
 
 ADD_EXECUTABLE(sdlgl3c
 	include/Camera.h
@@ -10,6 +10,7 @@ ADD_EXECUTABLE(sdlgl3c
 	include/Matrix.h
 	include/Renderer.h
 	include/Shader.h
+	include/SDLGLApp.h
 	include/Vec3.h
 	src/Camera.c
 	src/Frustum.c
@@ -17,6 +18,7 @@ ADD_EXECUTABLE(sdlgl3c
 	src/Matrix.c
 	src/Renderer.c
 	src/Shader.c
+	src/SDLGLApp.c
 	src/Vec3.c
 )
 
@@ -27,6 +29,7 @@ ADD_EXECUTABLE(sdlgl3c-test
 	include/Matrix.h
 	include/Renderer.h
 	include/Shader.h
+	include/SDLGLApp.h
 	include/Vec3.h
 	src/Camera.c
 	src/Frustum.c
@@ -34,6 +37,7 @@ ADD_EXECUTABLE(sdlgl3c-test
 	src/Matrix.c
 	src/Renderer.c
 	src/Shader.c
+	src/SDLGLApp.c
 	src/Vec3.c
 )
 
@@ -59,8 +63,9 @@ IF(NOT SQLITE3_FOUND)
 ENDIF(NOT SQLITE3_FOUND)
 
 IF(NOT SQLITE3_FOUND)
-	MESSAGE(ERROR " SQLITE3 not found!")
+	MESSAGE(ERROR " SQLITE3 not found")
 ENDIF(NOT SQLITE3_FOUND)
+
 
 INCLUDE_DIRECTORIES(include)
 INCLUDE_DIRECTORIES(${OpenGL_INCLUDE_DIRS})
@@ -78,7 +83,5 @@ LINK_DIRECTORIES(${SQLITE3_LIBRARY_DIRS})
 ADD_DEFINITIONS(${OpenGL_DEFINITIONS})
 ADD_DEFINITIONS(${SQLITE3_DEFINITIONS})
 
-
-TARGET_LINK_LIBRARIES(sdlgl3c ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} -lm)
-TARGET_LINK_LIBRARIES(sdlgl3c-test ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} -lm)
-
+TARGET_LINK_LIBRARIES(sdlgl3c-test ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} m)
+TARGET_LINK_LIBRARIES(sdlgl3c ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} m)

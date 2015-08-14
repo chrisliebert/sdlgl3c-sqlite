@@ -8,8 +8,9 @@
 
 #define PI 3.1415926535897932384626433832795f
 
-typedef struct Matrix {
-	float m[4][4];
+typedef struct Matrix
+{
+    float m[4][4];
 } Matrix;
 
 float* Matrix_getOneDimensionalArray(Matrix*);

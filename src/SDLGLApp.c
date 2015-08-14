@@ -1,25 +1,4 @@
-#include <assert.h>
-#include "Renderer.h"
-
-typedef struct SDLGLApp
-{
-    SDL_Window* window;
-    Renderer renderer;
-    Camera camera;
-    SDL_GLContext glContext;
-    SDL_Event event;
-
-    float position[3];
-    float direction[3];
-    float right[3];
-    float horizontalAngle;
-    float verticalAngle;
-    float speed;
-    float mouseSpeed;
-    float deltaTime;
-    int runLevel;
-    double lastTime;
-} SDLGLApp;
+#include "SDLGLApp.h"
 
 void infoMsg(const char* msg)
 {
@@ -33,12 +12,6 @@ void errorMsg(const char* title)
 
 void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
 {
-    app->position[0] = 0.f;
-    app->position[1] = 10.f;
-    app->position[2] = 5.f;
-    app->horizontalAngle = 3.14159f;
-    app->verticalAngle = 0.f;
-    app->speed = .001f;
     app->mouseSpeed = 0.001f;
     app->runLevel = 1;
     app->lastTime = SDL_GetTicks();
@@ -66,11 +39,9 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
 
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
         Renderer_init(&app->renderer, dbFileName);
-        Renderer_buildScene(&app->renderer);
 
-
-        Uint32 flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
-        app->window = SDL_CreateWindow("", 0, 0, 0,0, flags);
+        Uint32 flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN; /* | SDL_WINDOW_FULLSCREEN; */
+        app->window = SDL_CreateWindow("", 300, 100, 800, 600, flags);
         if (app->window == NULL)
         {
             fprintf(stderr, "Unable to create window: %s\n", SDL_GetError());
@@ -80,7 +51,6 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
         }
         else
         {
-
             app->glContext = SDL_GL_CreateContext(app->window);
             if (app->glContext == NULL)
             {
@@ -89,9 +59,8 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
                 app->runLevel = 0;
                 return;
             }
-            /* This makes our buffer swap syncronized with the monitor's vertical refresh */
+            /* This makes our buffer swap syncronized with the monitor's vertical refresh (disabled for benchmarking) */
             SDL_GL_SetSwapInterval(0);
-
 
             /* Initialize GLEW */
 #ifdef USE_GLEW
@@ -106,9 +75,9 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
                 free((void*)errorStr);
             }
 #endif
-            checkForGLError();
+            Renderer_buildScene(&app->renderer);
             Renderer_bufferToGPU(&app->renderer);
-            Log("OpenGL %s\n", glGetString(GL_VERSION));
+            /* Log("OpenGL %s\n", glGetString(GL_VERSION)); */
 
             int flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
             int initted = IMG_Init(flags);
@@ -155,13 +124,11 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
         SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
         SDL_WarpMouseInWindow(app->window, viewport[2] / 2, viewport[3] / 2);
         SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
-        checkForGLError();
     }
 }
 
 void SDLGLApp_destroy(SDLGLApp* app)
 {
-    checkForGLError();
     SDL_GL_DeleteContext(app->glContext);
     SDL_DestroyWindow(app->window);
     Renderer_destroy(&app->renderer);
@@ -188,7 +155,6 @@ void SDLGLApp_start(SDLGLApp* app)
 {
     while (app->runLevel > 0)
     {
-        checkForGLError();
         SDL_PollEvent(&app->event);
 
         if (app->event.type == SDL_QUIT)
@@ -213,116 +179,60 @@ void SDLGLApp_start(SDLGLApp* app)
 
         if (keys[SDL_SCANCODE_W])
         {
-            Camera_moveForward(&app->camera, app->deltaTime * app->speed);
+            Camera_moveForward(&app->camera, app->deltaTime);
         }
 
         if (keys[SDL_SCANCODE_S])
         {
-            Camera_moveForward(&app->camera, -1.0 * app->deltaTime * app->speed);
+            Camera_moveBackward(&app->camera, app->deltaTime);
         }
 
         if (keys[SDL_SCANCODE_D])
         {
-            app->position[0] += app->deltaTime * app->speed;
-            Camera_moveRight(&app->camera, app->deltaTime * app->speed);
+            Camera_moveRight(&app->camera, app->deltaTime);
         }
 
         if (keys[SDL_SCANCODE_A])
         {
-            Camera_moveRight(&app->camera, -1.0 * app->deltaTime * app->speed);
+            Camera_moveLeft(&app->camera, app->deltaTime);
         }
 
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        int width = viewport[2];
-        int height = viewport[3];
+        double width = (double)viewport[2];
+        double height = (double)viewport[3];
 
         /* Get mouse position */
         double xpos, ypos;
         int x, y;
         SDL_GetMouseState(&x, &y);
 
+
+        // Ignore mouse input less than 2 pixels from origin (smoothing)
+        if(abs(x - floor(viewport[2]/2.0)) < 2) x = floor(viewport[2]/2.0);
+        if(abs(y - floor(viewport[3]/2.0)) < 2) y = floor(viewport[3]/2.0);
+
+        //if(abs(x - viewport[2]) < 3) x = floor(width/2.0);
+        //if(abs(y - viewport[3]) < 3) y = floor(height/2.0);
+
         xpos = (double) x;
         ypos = (double) y;
 
         SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-        SDL_WarpMouseInWindow(app->window, width / 2, height / 2);
+        SDL_WarpMouseInWindow(app->window, (int)(width / 2.0),(int)(height / 2.0));
         SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
 
         /* Compute time difference between current and last frame */
         double currentTime = SDL_GetTicks();
         app->deltaTime = (float) (currentTime - app->lastTime);
 
-        /* Compute new orientation */
-        app->horizontalAngle += app->mouseSpeed * app->deltaTime * (float) (width / 2 - xpos);
-        app->verticalAngle += app->mouseSpeed * app->deltaTime * (float) (height / 2 - ypos);
+        Camera_aim(&app->camera, app->mouseSpeed * (float) (floor(width / 2.0) - xpos), app->mouseSpeed * (float) (floor(height / 2.0) - ypos));
 
-        app->direction[0] = cos(app->verticalAngle) * sin(app->horizontalAngle);
-        app->direction[1] = sin(app->verticalAngle);
-        app->direction[2] = cos(app->verticalAngle) * cos(app->horizontalAngle);
-
-        /* Right vector */
-        app->right[0] = sin(app->horizontalAngle - 3.14f / 2.0f);
-        app->right[1] = 0;
-        app->right[2] = cos(app->horizontalAngle - 3.14f / 2.0f);
-
-        /* Up vector */
-
-        /* vec3 up = cross( right, direction ) */
-        /* TODO: implement cross-product routine */
-        float up[3];
-
-        up[0] = 0.f;
-        up[1] = 1.f;
-        up[2] = 0.f;
-
-        Matrix_lookAt(&app->camera.modelViewMatrix, app->position[0], app->position[1], app->position[2], app->position[0] + app->direction[0],
-                app->position[1] + app->direction[1], app->position[2] + app->direction[2], up[0], up[1], up[2]);
+        Camera_update(&app->camera);
         app->lastTime = currentTime;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        checkForGLError();
         Renderer_render(&app->renderer, &app->camera);
-        checkForGLError();
         SDL_GL_SwapWindow(app->window);
-        checkForGLError();
-        app->runLevel = -1; // End test
     }
-}
-
-void testRenderer(Renderer* r)
-{
-    /* Assert data is loaded */
-    assert(r->vertexDataSize > 0);
-    assert(r->vertexData != 0);
-    assert(r->numIndices > 0);
-    assert(r->indices != 0);
-    assert(r->numSceneNodes > 0);
-    assert(r->sceneNodes != 0);
-    assert(r->numMaterials > 0);
-    assert(r->materials != 0);
-}
-
-void runTests(SDLGLApp* a)
-{
-    testRenderer(&a->renderer);
-}
-
-int main(int argc, char** argv)
-{
-    SDLGLApp* app = malloc(sizeof(SDLGLApp));
-    char dbFile[100];
-    dbFile[0] = '\0';
-    strcat(dbFile, MODEL_DIRECTORY);
-    strcat(dbFile, DIRECTORY_SEPARATOR);
-    strcat(dbFile, "portland.db");
-    SDLGLApp_init(app, dbFile);
-    Log("Scene loaded\n");
-    SDLGLApp_start(app);
-    Log("Scene rendered once\nRunning assertions\n");
-    runTests(app);
-    SDLGLApp_destroy(app);
-    free(app);
-    Log("Test passed\n");
-    return (0);
 }

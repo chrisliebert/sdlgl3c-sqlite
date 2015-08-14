@@ -109,6 +109,9 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
             SDL_RWops *rw = 0;
             rw = SDL_RWFromMem( buffer, (sizeof(unsigned char) * sqlite3_column_bytes(pStmt, 0)) );
 
+
+            //SDL_Surface* image = IMG_Load_RW(rw, 1);
+
             //textureFileName
             char fileExtension[4];
             fileExtension[3] = '\0';
@@ -117,7 +120,8 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
             strncpy(&fileExtension[0], extensionPtr, 3);
 
             //fix for .xv images
-            if(strcmp(fileExtension, ".xv") == 0) {
+            if(strcmp(fileExtension, ".xv") == 0)
+            {
                 fileExtension[0] = 'x';
                 fileExtension[1] = 'v';
                 fileExtension[2] = '\0';
@@ -140,7 +144,7 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
                 /* SDL_SetColorKey(image, SDL_RLEACCEL, image->format->colorkey   ); */
             }
             glTexImage2D(GL_TEXTURE_2D, 0, mode, image->w, image->h, 0, mode,
-                         GL_UNSIGNED_BYTE, image->pixels);
+                    GL_UNSIGNED_BYTE, image->pixels);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -218,7 +222,8 @@ void Renderer_buildScene(Renderer* renderer)
     }
 
     renderer->vertexDataSize = getNumRows(db, stmt, &rc, "vertex");
-    if(renderer->vertexDataSize <= 0) {
+    if(renderer->vertexDataSize <= 0)
+    {
         Log_error("Unable to load vertex data\n");
         exit(4);
     }
@@ -360,7 +365,7 @@ void Renderer_buildScene(Renderer* renderer)
             if (strlen(renderer->materials[renderer->sceneNodes[i].material_id - 1].diffuse_texture_name) > 0)
             {
                 addTexture(renderer, renderer->materials[renderer->sceneNodes[i].material_id - 1].diffuse_texture_name,
-                           &renderer->sceneNodes[i].diffuse_texture_id, db);
+                        &renderer->sceneNodes[i].diffuse_texture_id, db);
             }
         }
     }
@@ -406,7 +411,7 @@ void Renderer_bufferToGPU(Renderer* renderer)
         glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &length);
         log = (char*) malloc(length);
         glGetProgramInfoLog(programId, length, &result, log);
-        Log_message("Unable to link shader: %s\n", log);
+        Log_error("Unable to link shader: %s\n", log);
         free(log);
     }
     glBindVertexArray(0);
@@ -420,10 +425,11 @@ void Renderer_render(Renderer* renderer, Camera* camera)
 
     if (renderer->numSceneNodes == 0)
     {
-        Log_message("skipping render() on empty scene\n");
+        Log_error("skipping render() on empty scene\n");
         exit(1);
         return;
     }
+
     checkForGLError();
     glBindVertexArray(renderer->vao);
     glEnableVertexAttribArray(0);
@@ -448,7 +454,7 @@ void Renderer_render(Renderer* renderer, Camera* camera)
          ...
          }*/
 
-        float lightPos[3] = { 10.f, 35.f, 0.f };
+        float lightPos[3] = { 10.f, 135.f, 0.f };
         checkForGLError();
 
         glActiveTexture(GL_TEXTURE0);
@@ -474,20 +480,20 @@ void Renderer_render(Renderer* renderer, Camera* camera)
         checkForGLError();
         glUniform3f(LightID, lightPos[0], lightPos[1], lightPos[2]);
         glUniform3f(ambientLocation, renderer->materials[renderer->sceneNodes[i].material_id].ambient[0],
-                    renderer->materials[renderer->sceneNodes[i].material_id].ambient[1],
-                    renderer->materials[renderer->sceneNodes[i].material_id].ambient[2]);
+                renderer->materials[renderer->sceneNodes[i].material_id].ambient[1],
+                renderer->materials[renderer->sceneNodes[i].material_id].ambient[2]);
         glUniform3f(diffuseLocation, renderer->materials[renderer->sceneNodes[i].material_id].diffuse[0],
-                    renderer->materials[renderer->sceneNodes[i].material_id].diffuse[1],
-                    renderer->materials[renderer->sceneNodes[i].material_id].diffuse[2]);
+                renderer->materials[renderer->sceneNodes[i].material_id].diffuse[1],
+                renderer->materials[renderer->sceneNodes[i].material_id].diffuse[2]);
         glUniform3f(specularLocation, renderer->materials[renderer->sceneNodes[i].material_id].specular[0],
-                    renderer->materials[renderer->sceneNodes[i].material_id].specular[1],
-                    renderer->materials[renderer->sceneNodes[i].material_id].specular[2]);
+                renderer->materials[renderer->sceneNodes[i].material_id].specular[1],
+                renderer->materials[renderer->sceneNodes[i].material_id].specular[2]);
         glUniform1i(
-            glGetUniformLocation(renderer->gpuProgram, "myTextureSampler"), 0);
+                glGetUniformLocation(renderer->gpuProgram, "myTextureSampler"), 0);
         checkForGLError();
         glDrawRangeElementsBaseVertex(renderer->sceneNodes[i].primative_mode, renderer->sceneNodes[i].start_position,
-                                      renderer->sceneNodes[i].end_position, (renderer->sceneNodes[i].end_position - renderer->sceneNodes[i].start_position),
-                                      GL_UNSIGNED_INT, (void*) (0), renderer->sceneNodes[i].start_position);
+                renderer->sceneNodes[i].end_position, (renderer->sceneNodes[i].end_position - renderer->sceneNodes[i].start_position),
+                GL_UNSIGNED_INT, (void*) (0), renderer->sceneNodes[i].start_position);
 
         checkForGLError();
     }

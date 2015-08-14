@@ -96,7 +96,8 @@ char* readFile(const char* filename)
     char *contents;
     int fileSize = 0;
     stream = fopen(filename, "r");
-    if(stream == 0) {
+    if(stream == 0)
+    {
         Log_error("Unable to load %s\n", filename);
         exit(2);
     }
@@ -129,6 +130,5 @@ void Shader_init(Shader* shader, const char* filePath)
 void Shader_destroy(Shader* shader)
 {
     glDeleteShader(shader->id);
-    //free((char*) shader->filePath);
     free((char*) shader->shaderSrc);
 }

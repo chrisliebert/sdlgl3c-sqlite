@@ -4,12 +4,14 @@
 #include "Common.h"
 #include "Matrix.h"
 
-typedef struct {
-	float x, y, z;
+typedef struct
+{
+    float x, y, z;
 } Point;
 
-typedef struct Frustum {
-	float f[6][4];
+typedef struct Frustum
+{
+    float f[6][4];
 } Frustum;
 
 void Frustum_init(Frustum*);

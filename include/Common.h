@@ -33,8 +33,7 @@
 #include <SDL_opengl.h>
 #endif
 
-#define MODEL_DIRECTORY "obj2sqlite"
-#define TEXTURE_DIRECTORY "textures"
+#define MODEL_DIRECTORY "."
 
 /* Cross-platform directory separator */
 #ifdef _WIN32
@@ -47,7 +46,6 @@
 #define MAX_FILENAME_LENGTH 1000
 
 #define Log(A,...)  printf(A,##__VA_ARGS__);
-#define Log_message(A,...)  printf(A,##__VA_ARGS__);
 #define Log_error(A,...)    fprintf(stderr,A,##__VA_ARGS__);
 
 #endif

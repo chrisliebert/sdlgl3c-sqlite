@@ -30,7 +30,7 @@ void Camera_init(Camera* camera)
     camera->up[0] = 0.f;
     camera->up[1] = 1.f;
     camera->up[2] = 0.f;
-    camera->speed = 0.005;
+    camera->speed = 0.15;
     /* Get viewport */
     GLint mViewport[4];
     glGetIntegerv( GL_VIEWPORT, mViewport);
