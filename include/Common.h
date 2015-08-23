@@ -53,14 +53,13 @@ char _log_msg[MAX_LOG_LENGTH];
 void infoMsg(const char*);
 void errorMsg(const char*);
 
-#ifdef LOG_TO_CONSOLE
-	#define Log(A)				printf(A);
-	#define Logf(A,...)         printf(A,##__VA_ARGS__);
+#define Log(A)				printf(A);
+#define Logf(A,...)         printf(A,##__VA_ARGS__);
+
+#ifdef ERROR_LOG_TO_CONSOLE
 	#define Log_error(A)        fprintf(stderr,A);
-	#define Log_errorf(A,...)   fprintf(stderr,A,##__VA_ARGS__); 
+	#define Log_errorf(A,...)   fprintf(stderr,A,##__VA_ARGS__);
 #else
-	#define Log(A)				infoMsg(A);
-	#define Logf(A,...)         _log_msg[0] = '\0'; sprintf(_log_msg,A,##__VA_ARGS__); errorMsg(_log_msg); _log_msg[0] = '\0'; 
 	#define Log_error(A)		errorMsg(A);
 	#define Log_errorf(A,...)	_err_msg[0] = '\0'; sprintf(_err_msg,A,##__VA_ARGS__); errorMsg(_err_msg); _err_msg[0] = '\0';
 #endif
