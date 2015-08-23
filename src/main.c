@@ -7,8 +7,8 @@ int main(int argc, char** argv)
 
     if(argc != 2)
     {
-        Log_error("Usage: %s <file.db>\n", argv[0]);
-        return 5;
+        Log_errorf("Usage: %s <file.db>\n", argv[0]);
+        return 0;
     }
 
     dbFile[0] = '\0';

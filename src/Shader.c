@@ -49,12 +49,12 @@ void FragmentShader_createShader(FragmentShader* shader)
         {
             infoLog = (char *) malloc(infologLength);
             glGetShaderInfoLog(shader->id, infologLength, &charsWritten, infoLog);
-            Log_error("The shader %s failed to compile: %s\n", shader->filePath, infoLog);
+            Log_errorf("The shader %s failed to compile: %s\n", shader->filePath, infoLog);
             free(infoLog);
         }
         else
         {
-            Log_error("The shader %s failed to compile\n", shader->filePath);
+            Log_errorf("The shader %s failed to compile\n", shader->filePath);
         }
     }
 }
@@ -80,12 +80,12 @@ void VertexShader_createShader(VertexShader* shader)
         {
             infoLog = (char *) malloc(infologLength);
             glGetShaderInfoLog(shader->id, infologLength, &charsWritten, infoLog);
-            Log_error("The shader %s failed to compile: %s\n", shader->filePath, infoLog);
+            Log_errorf("The shader %s failed to compile: %s\n", shader->filePath, infoLog);
             free(infoLog);
         }
         else
         {
-            Log_error("The shader %s failed to compile\n", shader->filePath);
+            Log_errorf("The shader %s failed to compile\n", shader->filePath);
         }
     }
 }
@@ -99,7 +99,7 @@ char* readFile(const char* filename)
     stream = fopen(filename, "r");
     if (stream == 0)
     {
-        Log_error("Unable to load %s\n", filename);
+        Log_errorf("Unable to load %s\n", filename);
         exit(2);
     }
 

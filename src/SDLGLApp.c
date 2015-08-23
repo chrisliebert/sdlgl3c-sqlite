@@ -7,7 +7,7 @@ void infoMsg(const char* msg)
 
 void errorMsg(const char* title)
 {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, SDL_GetError(), NULL);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, SDL_GetError(), title, NULL);
 }
 
 void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
@@ -25,7 +25,7 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
-        Log_error("Unable to initialize SDL: %s\n", SDL_GetError());
+        Log_errorf("Unable to initialize SDL: %s\n", SDL_GetError());
         app->runLevel = 0;
     }
     else
@@ -78,7 +78,7 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
             checkForGLError();
             if (GLEW_OK != err)
             {
-                Log_error("Error: %s\n", glewGetErrorString(err));
+                Log_errorf("Error: %s\n", glewGetErrorString(err));
                 errorStr = (char*) glewGetErrorString(err);
                 errorMsg(errorStr);
                 free((void*)errorStr);
@@ -91,14 +91,14 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
 
             Renderer_buildScene(&app->renderer);
             Renderer_bufferToGPU(&app->renderer);
-            Log("OpenGL %s\n", glGetString(GL_VERSION));
+            Logf("OpenGL %s\n", glGetString(GL_VERSION));
 
             flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
             initted = IMG_Init(flags);
             if ((initted & flags) != flags)
             {
                 Log_error("IMG_Init: Failed to init required jpg and png support!\n");
-                Log_error("IMG_Init: %s\n", IMG_GetError());
+                Log_errorf("IMG_Init: %s\n", IMG_GetError());
             }
 
         }

@@ -5,7 +5,6 @@
 #define NULL 0
 #endif
 
-/* Fix static analysis for eclipse */
 #undef __cplusplus
 
 #define _DEBUG 1 /* TODO: integrate with cmake */
@@ -47,11 +46,23 @@
 #define MAX_FILENAME_LENGTH 1000
 #define MAX_LOG_LENGTH 1000
 
-/* Use message box for Log: 
+/* Log messages with message boxes */
+char _err_msg[MAX_LOG_LENGTH];
 char _log_msg[MAX_LOG_LENGTH];
-#define Log(A,...)          _log_msg[0] = '\0'; sprintf(_log_msg,A,##__VA_ARGS__); infoMsg(_log_msg); _log_msg[0] = '\0';
-*/
-#define Log(A,...)    printf(A,##__VA_ARGS__);
-#define Log_error(A,...)    fprintf(stderr,A,##__VA_ARGS__);
+
+void infoMsg(const char*);
+void errorMsg(const char*);
+
+#ifdef LOG_TO_CONSOLE
+	#define Log(A)				printf(A);
+	#define Logf(A,...)         printf(A,##__VA_ARGS__);
+	#define Log_error(A)        fprintf(stderr,A);
+	#define Log_errorf(A,...)   fprintf(stderr,A,##__VA_ARGS__); 
+#else
+	#define Log(A)				infoMsg(A);
+	#define Logf(A,...)         _log_msg[0] = '\0'; sprintf(_log_msg,A,##__VA_ARGS__); errorMsg(_log_msg); _log_msg[0] = '\0'; 
+	#define Log_error(A)		errorMsg(A);
+	#define Log_errorf(A,...)	_err_msg[0] = '\0'; sprintf(_err_msg,A,##__VA_ARGS__); errorMsg(_err_msg); _err_msg[0] = '\0';
+#endif
 
 #endif /* _COMMON_H_ */

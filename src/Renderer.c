@@ -11,19 +11,19 @@ void _checkForGLError(const char *file, int line)
         switch (err)
         {
         case GL_INVALID_OPERATION:
-            Log_error("GL_%s - %s : %i\n", "GL_INVALID_OPERATION", file, line);
+            Log_errorf("GL_%s - %s : %i\n", "GL_INVALID_OPERATION", file, line);
             break;
         case GL_INVALID_ENUM:
-            Log_error("GL_%s - %s : %i\n", "GL_INVALID_ENUM", file, line);
+            Log_errorf("GL_%s - %s : %i\n", "GL_INVALID_ENUM", file, line);
             break;
         case GL_INVALID_VALUE:
-            Log_error("GL_%s - %s : %i\n", "GL_INVALID_VALUE", file, line);
+            Log_errorf("GL_%s - %s : %i\n", "GL_INVALID_VALUE", file, line);
             break;
         case GL_OUT_OF_MEMORY:
-            Log_error("GL_%s - %s : %i\n", "GL_OUT_OF_MEMORY", file, line);
+            Log_errorf("GL_%s - %s : %i\n", "GL_OUT_OF_MEMORY", file, line);
             break;
         case GL_INVALID_FRAMEBUFFER_OPERATION:
-            Log_error("GL_%s - %s : %i\n", "GL_INVALID_FRAMEBUFFER_OPERATION", file, line);
+            Log_errorf("GL_%s - %s : %i\n", "GL_INVALID_FRAMEBUFFER_OPERATION", file, line);
             break;
         }
 
@@ -134,7 +134,7 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
 
             if (image == NULL)
             {
-                Log_error("Unable to load bitmap: %s\n", SDL_GetError());
+                Log_errorf("Unable to load bitmap: %s\n", SDL_GetError());
                 exit(1);
             }
             glGenTextures(1, textureId);
@@ -224,7 +224,7 @@ void Renderer_buildScene(Renderer* renderer)
     rc = sqlite3_open(renderer->dbFileName, &db);
     if (rc)
     {
-        Log_error("Can't open database: %s\n", sqlite3_errmsg(db));
+        Log_errorf("Can't open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(1);
     }
@@ -240,7 +240,7 @@ void Renderer_buildScene(Renderer* renderer)
     rc = sqlite3_prepare_v2(db, "SELECT * from vertex", -1, &stmt, NULL);
     if (rc != SQLITE_OK)
     {
-        Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
+        Log_errorf("SQL Error: %s\n", sqlite3_errmsg(db));
     }
     i = 0;
 
@@ -250,7 +250,7 @@ void Renderer_buildScene(Renderer* renderer)
 
         if (rc != SQLITE_ROW && rc != SQLITE_DONE)
         {
-            Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
+            Log_errorf("SQL Error: %s\n", sqlite3_errmsg(db));
             break;
         }
         else if (rc == SQLITE_DONE)
@@ -275,7 +275,7 @@ void Renderer_buildScene(Renderer* renderer)
     rc = sqlite3_prepare_v2(db, "SELECT * from material", -1, &stmt, NULL);
     if (rc != SQLITE_OK)
     {
-        Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
+        Log_errorf("SQL Error: %s\n", sqlite3_errmsg(db));
     }
 
     renderer->numMaterials = getNumRows(db, stmt, &rc, "material");
@@ -289,7 +289,7 @@ void Renderer_buildScene(Renderer* renderer)
 
         if (rc != SQLITE_ROW && rc != SQLITE_DONE)
         {
-            Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
+            Log_errorf("SQL Error: %s\n", sqlite3_errmsg(db));
             break;
         }
         else if (rc == SQLITE_DONE)
@@ -328,7 +328,7 @@ void Renderer_buildScene(Renderer* renderer)
 
     if (rc != SQLITE_OK)
     {
-        Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
+        Log_errorf("SQL Error: %s\n", sqlite3_errmsg(db));
     }
 
     i = 0;
@@ -342,7 +342,7 @@ void Renderer_buildScene(Renderer* renderer)
 
         if (rc != SQLITE_ROW && rc != SQLITE_DONE)
         {
-            Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
+            Log_errorf("SQL Error: %s\n", sqlite3_errmsg(db));
             break;
         }
         else if (rc == SQLITE_DONE)
@@ -374,7 +374,7 @@ void Renderer_buildScene(Renderer* renderer)
     {
         if (renderer->sceneNodes[i].materialId > renderer->numMaterials)
         {
-            Log_error("Material id out of bounds: materialId=%i, num_materials=%i\n", renderer->sceneNodes[i].materialId, renderer->numMaterials);
+            Log_errorf("Material id out of bounds: materialId=%i, num_materials=%i\n", renderer->sceneNodes[i].materialId, renderer->numMaterials);
         }
         else
         {
@@ -433,7 +433,7 @@ void Renderer_bufferToGPU(Renderer* renderer)
         glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &length);
         log = (char*) malloc(length);
         glGetProgramInfoLog(programId, length, &result, log);
-        Log_error("Unable to link shader: %s\n", log);
+        Log_errorf("Unable to link shader: %s\n", log);
         free(log);
     }
     glBindVertexArray(0);

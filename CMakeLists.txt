@@ -3,45 +3,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(sdlgl3c-test)
 PROJECT(sdlgl3c)
 
-ADD_EXECUTABLE(sdlgl3c
-	include/Camera.h
-	include/Common.h
-	include/Frustum.h
-	include/Matrix.h
-	include/Renderer.h
-	include/Shader.h
-	include/SDLGLApp.h
-	include/Vec3.h
-	src/Camera.c
-	src/Frustum.c
-	src/main.c
-	src/Matrix.c
-	src/Renderer.c
-	src/Shader.c
-	src/SDLGLApp.c
-	src/Vec3.c
-)
-
-ADD_EXECUTABLE(sdlgl3c-test
-	include/Camera.h
-	include/Common.h
-	include/Frustum.h
-	include/Matrix.h
-	include/Renderer.h
-	include/Shader.h
-	include/SDLGLApp.h
-	include/Vec3.h
-	src/Camera.c
-	src/Frustum.c
-	src/test.c
-	src/Matrix.c
-	src/Renderer.c
-	src/Shader.c
-	src/SDLGLApp.c
-	src/Vec3.c
-)
-
-
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLEW REQUIRED)
 FIND_PACKAGE(SQLITE3 QUIET)
@@ -83,5 +44,36 @@ LINK_DIRECTORIES(${SQLITE3_LIBRARY_DIRS})
 ADD_DEFINITIONS(${OpenGL_DEFINITIONS})
 ADD_DEFINITIONS(${SQLITE3_DEFINITIONS})
 
-TARGET_LINK_LIBRARIES(sdlgl3c-test ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} m)
-TARGET_LINK_LIBRARIES(sdlgl3c ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} m)
+ADD_LIBRARY(GraphicsEngine
+	include/Camera.h
+	include/Common.h
+	include/Frustum.h
+	include/Matrix.h
+	include/Renderer.h
+	include/Shader.h
+	include/SDLGLApp.h
+	include/Vec3.h
+	src/Camera.c
+	src/Frustum.c
+	src/Matrix.c
+	src/Renderer.c
+	src/Shader.c
+	src/SDLGLApp.c
+	src/Vec3.c
+)
+
+ADD_EXECUTABLE(sdlgl3c
+	src/main.c
+)
+
+ADD_EXECUTABLE(sdlgl3c-test
+	src/test.c
+)
+
+IF(MSVC)
+TARGET_LINK_LIBRARIES(sdlgl3c-test GraphicsEngine ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES})
+TARGET_LINK_LIBRARIES(sdlgl3c GraphicsEngine ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES})
+ELSE(MSVC)
+TARGET_LINK_LIBRARIES(sdlgl3c-test GraphicsEngine ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} m)
+TARGET_LINK_LIBRARIES(sdlgl3c GraphicsEngine ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} m)
+ENDIF(MSVC)
