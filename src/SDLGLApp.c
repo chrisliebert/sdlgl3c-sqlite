@@ -169,7 +169,7 @@ void SDLGLApp_start(SDLGLApp* app)
     double width, height;
     double xpos, ypos;
     int x, y;
-    double currentTime;
+	double currentTime = SDL_GetTicks();
 
     while (app->runLevel > 0)
     {

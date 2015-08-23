@@ -47,8 +47,11 @@
 #define MAX_FILENAME_LENGTH 1000
 #define MAX_LOG_LENGTH 1000
 
-#define Log(A,...)          char _log_msg[MAX_LOG_LENGTH]; sprintf(_log_msg,A,##__VA_ARGS__); infoMsg(_log_msg);
-
+/* Use message box for Log: 
+char _log_msg[MAX_LOG_LENGTH];
+#define Log(A,...)          _log_msg[0] = '\0'; sprintf(_log_msg,A,##__VA_ARGS__); infoMsg(_log_msg); _log_msg[0] = '\0';
+*/
+#define Log(A,...)    printf(A,##__VA_ARGS__);
 #define Log_error(A,...)    fprintf(stderr,A,##__VA_ARGS__);
 
 #endif /* _COMMON_H_ */
