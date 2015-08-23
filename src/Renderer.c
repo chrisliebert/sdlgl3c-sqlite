@@ -7,29 +7,26 @@ void _checkForGLError(const char *file, int line)
     GLenum err = glGetError();
     while (err != GL_NO_ERROR)
     {
-		char error[40];
-        error[0] = '\0';
         numErrors++;
         switch (err)
         {
         case GL_INVALID_OPERATION:
-            strcpy(error, "INVALID_OPERATION");
+            Log_error("GL_%s - %s : %i\n", "GL_INVALID_OPERATION", file, line);
             break;
         case GL_INVALID_ENUM:
-            strcpy(error, "INVALID_ENUM");
+            Log_error("GL_%s - %s : %i\n", "GL_INVALID_ENUM", file, line);
             break;
         case GL_INVALID_VALUE:
-            strcpy(error, "INVALID_VALUE");
+            Log_error("GL_%s - %s : %i\n", "GL_INVALID_VALUE", file, line);
             break;
         case GL_OUT_OF_MEMORY:
-            strcpy(error, "OUT_OF_MEMORY");
+            Log_error("GL_%s - %s : %i\n", "GL_OUT_OF_MEMORY", file, line);
             break;
         case GL_INVALID_FRAMEBUFFER_OPERATION:
-            strcpy(error, "INVALID_FRAMEBUFFER_OPERATION");
+            Log_error("GL_%s - %s : %i\n", "GL_INVALID_FRAMEBUFFER_OPERATION", file, line);
             break;
         }
 
-        Log_error("GL_%s - %s : %i\n", error, file, line);
         if (numErrors > 50)
         {
             exit(1);
@@ -51,25 +48,26 @@ void Renderer_init(Renderer* renderer, const char* dbFileName)
     renderer->materials = 0;
     renderer->dbFileName = 0;
     renderer->dbFileName = malloc((strlen(dbFileName) + 1) * sizeof(char));
-	assert(renderer->dbFileName);
+    assert(renderer->dbFileName);
     renderer->dbFileName[0] = '\0';
-	strcpy(renderer->dbFileName, dbFileName);
-	renderer->useFixedFunctionLegacyMode = false;
+    strcpy(renderer->dbFileName, dbFileName);
+    renderer->useFixedFunctionLegacyMode = false;
 }
 
 void Renderer_destroy(Renderer* renderer)
 {
-	if (!renderer->useFixedFunctionLegacyMode) {
-		if (renderer->numSceneNodes > 0)
-		{
-			glDeleteBuffers(1, &renderer->vbo);
-			glDeleteBuffers(1, &renderer->ibo);
-			glDeleteVertexArrays(1, &renderer->vao);
-		}
+    if (!renderer->useFixedFunctionLegacyMode)
+    {
+        if (renderer->numSceneNodes > 0)
+        {
+            glDeleteBuffers(1, &renderer->vbo);
+            glDeleteBuffers(1, &renderer->ibo);
+            glDeleteVertexArrays(1, &renderer->vao);
+        }
 
-		FragmentShader_destroy(&renderer->fragShader);
-		VertexShader_destroy(&renderer->vertShader);
-	}
+        FragmentShader_destroy(&renderer->fragShader);
+        VertexShader_destroy(&renderer->vertShader);
+    }
 
     if (renderer->vertexData && renderer->vertexDataSize > 0)
     {
@@ -96,31 +94,35 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
     const char *zSql = "SELECT image FROM texture WHERE name = ?";
     sqlite3_stmt *pStmt;
     int rc;
+    int exOffset = (int)(strlen(textureFileName) - 3);
+    const char* extensionPtr = &textureFileName[exOffset];
 
+    assert(renderer);
+    assert(db);
 
     do
     {
         rc = sqlite3_prepare(db, zSql, -1, &pStmt, 0);
         sqlite3_bind_text(pStmt, 1, textureFileName, -1, SQLITE_STATIC);
         rc = sqlite3_step(pStmt);
+
         if( rc==SQLITE_ROW )
         {
-            unsigned char* buffer = 0;
-            buffer = malloc(sizeof(unsigned char) * sqlite3_column_bytes(pStmt, 0));
-			assert(buffer);
-            memcpy(buffer, sqlite3_column_blob(pStmt, 0), sqlite3_column_bytes(pStmt, 0));
-
             SDL_RWops *rw = 0;
-            rw = SDL_RWFromMem( buffer, (sizeof(unsigned char) * sqlite3_column_bytes(pStmt, 0)) );
-
+            unsigned char* buffer = 0;
+            SDL_Surface* image = NULL;
             char fileExtension[4];
+            int mode;
 
-            int exOffset = (int)(strlen(textureFileName) - 3);
-            const char* extensionPtr = &textureFileName[exOffset];
+            buffer = malloc(sizeof(unsigned char) * sqlite3_column_bytes(pStmt, 0));
+            assert(buffer);
+            memcpy(buffer, sqlite3_column_blob(pStmt, 0), sqlite3_column_bytes(pStmt, 0));
+            rw = SDL_RWFromMem(buffer, (sizeof(unsigned char) * sqlite3_column_bytes(pStmt, 0)));
+
             strncpy(&fileExtension[0], extensionPtr, 3);
-			fileExtension[3] = '\0';
+            fileExtension[3] = '\0';
 
-            //fix for .xv images
+            /* fix for .xv images */
             if(strcmp(fileExtension, ".xv") == 0)
             {
                 fileExtension[0] = 'x';
@@ -128,7 +130,7 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
                 fileExtension[2] = '\0';
             }
 
-            SDL_Surface* image = IMG_LoadTyped_RW(rw, 1, fileExtension);
+            image = IMG_LoadTyped_RW(rw, 1, fileExtension);
 
             if (image == NULL)
             {
@@ -137,19 +139,18 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
             }
             glGenTextures(1, textureId);
             glBindTexture(GL_TEXTURE_2D, *textureId);
-            int mode = GL_RGB;
+            mode = GL_RGB;
             if (image->format->BytesPerPixel == 4)
             {
                 mode = GL_RGBA;
                 /* SDL_SetColorKey(image, SDL_RLEACCEL, image->format->colorkey   ); */
             }
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             glTexImage2D(GL_TEXTURE_2D, 0, mode, image->w, image->h, 0, mode,
-                    GL_UNSIGNED_BYTE, image->pixels);
-
+                         GL_UNSIGNED_BYTE, image->pixels);
 
             /* Free the temporary surface */
             /* SDL_free(rw); */
@@ -182,6 +183,7 @@ int getNumRows(sqlite3* db, sqlite3_stmt* stmt, int* rc, const char* table)
 
     if (*rc != SQLITE_DONE)
     {
+        int retVal;
         *rc = sqlite3_step(stmt);
 
         if (*rc != SQLITE_ROW && *rc != SQLITE_DONE)
@@ -193,7 +195,7 @@ int getNumRows(sqlite3* db, sqlite3_stmt* stmt, int* rc, const char* table)
         {
             return -3;
         }
-        int retVal = sqlite3_column_int(stmt, 0);
+        retVal = sqlite3_column_int(stmt, 0);
         sqlite3_finalize(stmt);
         return (retVal);
     }
@@ -205,16 +207,19 @@ int getNumRows(sqlite3* db, sqlite3_stmt* stmt, int* rc, const char* table)
 
 void Renderer_buildScene(Renderer* renderer)
 {
+    SceneNode* sceneNode = NULL;
+    sqlite3* db = 0;
+    sqlite3_stmt* stmt = 0;
+    int rc;
+    int i;
+    Material *m = NULL;
+    Vertex *v;
+
     if (renderer == 0)
     {
         Log_error("Renderer is null\n");
         return;
     }
-    int i;
-
-    sqlite3* db = 0;
-    sqlite3_stmt* stmt = 0;
-    int rc;
 
     rc = sqlite3_open(renderer->dbFileName, &db);
     if (rc)
@@ -235,7 +240,7 @@ void Renderer_buildScene(Renderer* renderer)
     rc = sqlite3_prepare_v2(db, "SELECT * from vertex", -1, &stmt, NULL);
     if (rc != SQLITE_OK)
     {
-        fprintf(stderr, "SQL Error: %s\n", sqlite3_errmsg(db));
+        Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
     }
     i = 0;
 
@@ -245,14 +250,14 @@ void Renderer_buildScene(Renderer* renderer)
 
         if (rc != SQLITE_ROW && rc != SQLITE_DONE)
         {
-            fprintf(stderr, "SQL Error: %s\n", sqlite3_errmsg(db));
+            Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
             break;
         }
         else if (rc == SQLITE_DONE)
         {
             break;
         }
-        Vertex *v = &renderer->vertexData[i];
+        v = &renderer->vertexData[i];
         renderer->numIndices++;
 
         v->vertex[0] = intToFloat(sqlite3_column_int(stmt, 1));
@@ -270,64 +275,13 @@ void Renderer_buildScene(Renderer* renderer)
     rc = sqlite3_prepare_v2(db, "SELECT * from material", -1, &stmt, NULL);
     if (rc != SQLITE_OK)
     {
-        fprintf(stderr, "SQL Error: %s\n", sqlite3_errmsg(db));
+        Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
     }
 
     renderer->numMaterials = getNumRows(db, stmt, &rc, "material");
     renderer->materials = malloc(renderer->numMaterials * sizeof(Material));
-	assert(renderer->materials);
+    assert(renderer->materials);
     i = 0;
-    while (rc != SQLITE_DONE)
-    {
-        rc = sqlite3_step(stmt);
-
-        if (rc != SQLITE_ROW && rc != SQLITE_DONE)
-        {
-            fprintf(stderr, "SQL Error: %s\n", sqlite3_errmsg(db));
-            break;
-        }
-        else if (rc == SQLITE_DONE)
-        {
-            break;
-        }
-
-		Material *m = NULL;
-		m = &renderer->materials[i];
-		assert(m);
-
-        strcpy(m->name, (char*) sqlite3_column_text(stmt, 1));
-        strcpy(m->normal_texture_name, (char*) sqlite3_column_text(stmt, 2));
-        m->dissolve = intToFloat(sqlite3_column_int(stmt, 3));
-        m->diffuse[0] = intToFloat(sqlite3_column_int(stmt, 4));
-        m->diffuse[0] = intToFloat(sqlite3_column_int(stmt, 5));
-        m->diffuse[0] = intToFloat(sqlite3_column_int(stmt, 6));
-
-        m->emission[0] = intToFloat(sqlite3_column_int(stmt, 10));
-        m->emission[1] = intToFloat(sqlite3_column_int(stmt, 11));
-        m->emission[2] = intToFloat(sqlite3_column_int(stmt, 12));
-
-        strcpy(m->specular_texture_name, (char*) sqlite3_column_text(stmt, 14));
-        m->specular[0] = intToFloat(sqlite3_column_int(stmt, 15));
-        m->specular[1] = intToFloat(sqlite3_column_int(stmt, 16));
-        m->specular[2] = intToFloat(sqlite3_column_int(stmt, 17));
-        strcpy(m->diffuse_texture_name, (char*) sqlite3_column_text(stmt, 18));
-        m->ambient[0] = intToFloat(sqlite3_column_int(stmt, 19));
-        m->ambient[1] = intToFloat(sqlite3_column_int(stmt, 20));
-        m->ambient[2] = intToFloat(sqlite3_column_int(stmt, 21));
-        strcpy(m->ambient_texture_name, (char*) sqlite3_column_text(stmt, 22));
-        i++;
-    }
-    sqlite3_finalize(stmt);
-
-    rc = sqlite3_prepare_v2(db, "SELECT * from scene_node", -1, &stmt, NULL);
-    if (rc != SQLITE_OK)
-    {
-        Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
-    }
-    i = 0;
-    renderer->numSceneNodes = getNumRows(db, stmt, &rc, "scene_node");
-    renderer->sceneNodes = malloc(sizeof(SceneNode) * renderer->numSceneNodes);
-	assert(renderer->sceneNodes);
 
     while (rc != SQLITE_DONE)
     {
@@ -343,21 +297,73 @@ void Renderer_buildScene(Renderer* renderer)
             break;
         }
 
-		SceneNode* scene_node = NULL;
-		scene_node = &renderer->sceneNodes[i];
-		assert(scene_node);
-        strcpy(scene_node->name, (char*) sqlite3_column_text(stmt, 1));
-        scene_node->material_id = sqlite3_column_int(stmt, 2);
-        scene_node->start_position = sqlite3_column_int(stmt, 3);
-        scene_node->end_position = sqlite3_column_int(stmt, 4);
-        Matrix_loadIdentity(&scene_node->model_view_matrix);
-        scene_node->primative_mode = GL_TRIANGLES;
+        m = &renderer->materials[i];
+        assert(m);
+
+        strcpy(m->name, (char*) sqlite3_column_text(stmt, 1));
+        strcpy(m->normalTextureName, (char*) sqlite3_column_text(stmt, 2));
+        m->dissolve = intToFloat(sqlite3_column_int(stmt, 3));
+        m->diffuse[0] = intToFloat(sqlite3_column_int(stmt, 4));
+        m->diffuse[0] = intToFloat(sqlite3_column_int(stmt, 5));
+        m->diffuse[0] = intToFloat(sqlite3_column_int(stmt, 6));
+
+        m->emission[0] = intToFloat(sqlite3_column_int(stmt, 10));
+        m->emission[1] = intToFloat(sqlite3_column_int(stmt, 11));
+        m->emission[2] = intToFloat(sqlite3_column_int(stmt, 12));
+
+        strcpy(m->specularTextureName, (char*) sqlite3_column_text(stmt, 14));
+        m->specular[0] = intToFloat(sqlite3_column_int(stmt, 15));
+        m->specular[1] = intToFloat(sqlite3_column_int(stmt, 16));
+        m->specular[2] = intToFloat(sqlite3_column_int(stmt, 17));
+        strcpy(m->diffuseTextureName, (char*) sqlite3_column_text(stmt, 18));
+        m->ambient[0] = intToFloat(sqlite3_column_int(stmt, 19));
+        m->ambient[1] = intToFloat(sqlite3_column_int(stmt, 20));
+        m->ambient[2] = intToFloat(sqlite3_column_int(stmt, 21));
+        strcpy(m->ambientTextureName, (char*) sqlite3_column_text(stmt, 22));
+        i++;
+    }
+
+    sqlite3_finalize(stmt);
+    rc = sqlite3_prepare_v2(db, "SELECT * from scene_node", -1, &stmt, NULL);
+
+    if (rc != SQLITE_OK)
+    {
+        Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
+    }
+
+    i = 0;
+    renderer->numSceneNodes = getNumRows(db, stmt, &rc, "scene_node");
+    renderer->sceneNodes = malloc(sizeof(SceneNode) * renderer->numSceneNodes);
+    assert(renderer->sceneNodes);
+
+    while (rc != SQLITE_DONE)
+    {
+        rc = sqlite3_step(stmt);
+
+        if (rc != SQLITE_ROW && rc != SQLITE_DONE)
+        {
+            Log_error("SQL Error: %s\n", sqlite3_errmsg(db));
+            break;
+        }
+        else if (rc == SQLITE_DONE)
+        {
+            break;
+        }
+
+        sceneNode = &renderer->sceneNodes[i];
+        assert(sceneNode);
+        strcpy(sceneNode->name, (char*) sqlite3_column_text(stmt, 1));
+        sceneNode->materialId = sqlite3_column_int(stmt, 2);
+        sceneNode->startPosition = sqlite3_column_int(stmt, 3);
+        sceneNode->endPosition = sqlite3_column_int(stmt, 4);
+        Matrix_loadIdentity(&sceneNode->modelViewMatrix);
+        sceneNode->primativeMode = GL_TRIANGLES;
         i++;
     }
     sqlite3_finalize(stmt);
 
     renderer->indices = malloc(sizeof(GLuint) * renderer->numIndices);
-	assert(renderer->indices);
+    assert(renderer->indices);
     for (i = 0; i < renderer->numIndices + 1; i++)
     {
         renderer->indices[i] = i;
@@ -366,16 +372,16 @@ void Renderer_buildScene(Renderer* renderer)
     /* Load textures */
     for (i = 0; i < renderer->numSceneNodes; i++)
     {
-        if (renderer->sceneNodes[i].material_id > renderer->numMaterials)
+        if (renderer->sceneNodes[i].materialId > renderer->numMaterials)
         {
-            Log_error("Material id out of bounds: material_id=%i, num_materials=%i\n", renderer->sceneNodes[i].material_id, renderer->numMaterials);
+            Log_error("Material id out of bounds: materialId=%i, num_materials=%i\n", renderer->sceneNodes[i].materialId, renderer->numMaterials);
         }
         else
         {
-            if (strlen(renderer->materials[renderer->sceneNodes[i].material_id - 1].diffuse_texture_name) > 0)
+            if (strlen(renderer->materials[renderer->sceneNodes[i].materialId - 1].diffuseTextureName) > 0)
             {
-                addTexture(renderer, renderer->materials[renderer->sceneNodes[i].material_id - 1].diffuse_texture_name,
-                        &renderer->sceneNodes[i].diffuse_texture_id, db);
+                addTexture(renderer, renderer->materials[renderer->sceneNodes[i].materialId - 1].diffuseTextureName,
+                           &renderer->sceneNodes[i].diffuseTextureId, db);
             }
         }
     }
@@ -385,9 +391,13 @@ void Renderer_buildScene(Renderer* renderer)
 
 void Renderer_bufferToGPU(Renderer* renderer)
 {
-	if (renderer->useFixedFunctionLegacyMode) {
-		return; /* VBOs disabled in immediate mode */
-	}
+    GLint result;
+    GLuint programId;
+
+    if (renderer->useFixedFunctionLegacyMode)
+    {
+        return; /* VBOs disabled in immediate mode */
+    }
     /* Allocate and assign a Vertex Array Object to handle */
     glGenVertexArrays(1, &renderer->vao);
     /* Bind Vertex Array Object as the current used object */
@@ -406,15 +416,14 @@ void Renderer_bufferToGPU(Renderer* renderer)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * renderer->numIndices, &renderer->indices[0], GL_STATIC_DRAW);
     VertexShader_init(&renderer->vertShader, "shaders/default.vert");
-    //FragmentShader_init(&renderer->fragShader, "shaders/toon.frag");
-    FragmentShader_init(&renderer->fragShader, "shaders/default.frag");
+    FragmentShader_init(&renderer->fragShader, "shaders/default.frag" /* "shaders/toon.frag" */);
     renderer->gpuProgram = glCreateProgram();
     glAttachShader(renderer->gpuProgram, renderer->vertShader.id);
     glAttachShader(renderer->gpuProgram, renderer->fragShader.id);
     glLinkProgram(renderer->gpuProgram);
     /* Check for link errors */
-    GLint result;
-    GLuint programId = renderer->gpuProgram;
+
+    programId = renderer->gpuProgram;
     glGetProgramiv(programId, GL_LINK_STATUS, &result);
     if (result == GL_FALSE)
     {
@@ -435,51 +444,61 @@ void Renderer_bufferToGPU(Renderer* renderer)
 /* Rendering call for legacy graphics cards without support for shaders */
 void fixedFunctionRender(Renderer* renderer, Camera* camera)
 {
-	int i;
-	GLuint vertexIndex;
+    int i;
+    GLuint vertexIndex;
 
-	/* Set the projection and modelview matrices */
-	//TODO: move to resize() function
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glLoadMatrixf((GLfloat*)&camera->projectionMatrix.m);
+    /* Set the projection and modelview matrices */
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glLoadMatrixf((GLfloat*)&camera->projectionMatrix.m);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glLoadMatrixf((GLfloat*)&camera->modelViewMatrix.m);
-
-
-	glEnable(GL_TEXTURE_2D);
-	checkForGLError();
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glLoadMatrixf((GLfloat*)&camera->modelViewMatrix.m);
 
 
-	for (i = 0; i < renderer->numSceneNodes; i++) {
-		SceneNode* node = &renderer->sceneNodes[i];
-		Material* material = &renderer->materials[node->material_id];
-		//glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat*)&material->diffuse);
+    glEnable(GL_TEXTURE_2D);
+    checkForGLError();
 
-		//glEnable(GL_TEXTURE_2D);
-		//glEnable(GL_TEXTURE0);
-		//glActiveTexture(GL_TEXTURE0);
 
-		glBindTexture(GL_TEXTURE_2D, renderer->sceneNodes[i].diffuse_texture_id);
+    for (i = 0; i < renderer->numSceneNodes; i++)
+    {
+        SceneNode* node = &renderer->sceneNodes[i];
+        /*
+        Material* material = &renderer->materials[node->materialId];
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat*)&material->diffuse);
 
-		glBegin(GL_TRIANGLES);
-		for (vertexIndex = node->start_position; vertexIndex < node->end_position; vertexIndex++) {
-			Vertex* v = &renderer->vertexData[vertexIndex];
-			glVertex3fv((GLfloat*)&v->vertex);
-			glNormal3fv((GLfloat*)&v->normal);
-			glTexCoord2f(v->texcoord[0], v->texcoord[1]); // TODO: Fix offset error
-		}
-		glEnd();
-	}
+        glEnable(GL_TEXTURE_2D);
+        */
 
-	glFlush();
+        glBindTexture(GL_TEXTURE_2D, renderer->sceneNodes[i].diffuseTextureId);
+
+        glBegin(GL_TRIANGLES);
+        for (vertexIndex = node->startPosition; vertexIndex < node->endPosition; vertexIndex++)
+        {
+            Vertex* v = &renderer->vertexData[vertexIndex];
+            glVertex3fv((GLfloat*)&v->vertex);
+            glNormal3fv((GLfloat*)&v->normal);
+            glTexCoord2f(v->texcoord[0], v->texcoord[1]); /* TODO: Fix offset error */
+        }
+        glEnd();
+    }
+
+    glFlush();
 }
 
 void Renderer_render(Renderer* renderer, Camera* camera)
 {
     int i;
+    float lightPos[3] = { 10.f, 135.f, 0.f };
+    /* TODO: move uniforms to GPU buffer object */
+    GLuint programId = renderer->gpuProgram;
+    GLuint viewMatrixId = glGetUniformLocation(programId, "V");
+    GLuint modelMatrixId = glGetUniformLocation(programId, "M");
+    GLuint lightID = glGetUniformLocation(programId, "LightPosition_worldspace");
+    GLuint ambientLocation = glGetUniformLocation(programId, "MaterialAmbient");
+    GLuint diffuseLocation = glGetUniformLocation(programId, "MaterialDiffuse");
+    GLuint specularLocation = glGetUniformLocation(programId, "MaterialSpecular");
 
     if (renderer->numSceneNodes == 0)
     {
@@ -488,19 +507,18 @@ void Renderer_render(Renderer* renderer, Camera* camera)
         return;
     }
 
-	glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0);
 
-	if (renderer->useFixedFunctionLegacyMode) {
-		fixedFunctionRender(renderer, camera);
-		return;
-	}
+    if (renderer->useFixedFunctionLegacyMode)
+    {
+        fixedFunctionRender(renderer, camera);
+        return;
+    }
 
-    checkForGLError();
     glBindVertexArray(renderer->vao);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
-    checkForGLError();
     glBindBuffer(GL_ARRAY_BUFFER, renderer->vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->ibo);
 
@@ -519,47 +537,29 @@ void Renderer_render(Renderer* renderer, Camera* camera)
          ...
          }*/
 
-        float lightPos[3] = { 10.f, 135.f, 0.f };
-        checkForGLError();
 
-        checkForGLError();
-        glBindTexture(GL_TEXTURE_2D, renderer->sceneNodes[i].diffuse_texture_id);
-        checkForGLError();
-
-        /* TODO: move uniforms to buffer object */
-        GLuint programID = renderer->gpuProgram;
-        GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
-        GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
-        GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
-        GLuint ambientLocation = glGetUniformLocation(programID, "MaterialAmbient");
-        GLuint diffuseLocation = glGetUniformLocation(programID, "MaterialDiffuse");
-        GLuint specularLocation = glGetUniformLocation(programID, "MaterialSpecular");
-
-        checkForGLError();
+        glBindTexture(GL_TEXTURE_2D, renderer->sceneNodes[i].diffuseTextureId);
         glUseProgram(renderer->gpuProgram);
-        checkForGLError();
 
-        glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &camera->projectionMatrix.m[0][0]);
-        glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &camera->modelViewMatrix.m[0][0]);
-        checkForGLError();
-        glUniform3f(LightID, lightPos[0], lightPos[1], lightPos[2]);
-        glUniform3f(ambientLocation, renderer->materials[renderer->sceneNodes[i].material_id].ambient[0],
-                renderer->materials[renderer->sceneNodes[i].material_id].ambient[1],
-                renderer->materials[renderer->sceneNodes[i].material_id].ambient[2]);
-        glUniform3f(diffuseLocation, renderer->materials[renderer->sceneNodes[i].material_id].diffuse[0],
-                renderer->materials[renderer->sceneNodes[i].material_id].diffuse[1],
-                renderer->materials[renderer->sceneNodes[i].material_id].diffuse[2]);
-        glUniform3f(specularLocation, renderer->materials[renderer->sceneNodes[i].material_id].specular[0],
-                renderer->materials[renderer->sceneNodes[i].material_id].specular[1],
-                renderer->materials[renderer->sceneNodes[i].material_id].specular[2]);
+        glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, &camera->projectionMatrix.m[0][0]);
+        glUniformMatrix4fv(viewMatrixId, 1, GL_FALSE, &camera->modelViewMatrix.m[0][0]);
+        glUniform3f(lightID, lightPos[0], lightPos[1], lightPos[2]);
+        glUniform3f(ambientLocation, renderer->materials[renderer->sceneNodes[i].materialId].ambient[0],
+                    renderer->materials[renderer->sceneNodes[i].materialId].ambient[1],
+                    renderer->materials[renderer->sceneNodes[i].materialId].ambient[2]);
+        glUniform3f(diffuseLocation, renderer->materials[renderer->sceneNodes[i].materialId].diffuse[0],
+                    renderer->materials[renderer->sceneNodes[i].materialId].diffuse[1],
+                    renderer->materials[renderer->sceneNodes[i].materialId].diffuse[2]);
+        glUniform3f(specularLocation, renderer->materials[renderer->sceneNodes[i].materialId].specular[0],
+                    renderer->materials[renderer->sceneNodes[i].materialId].specular[1],
+                    renderer->materials[renderer->sceneNodes[i].materialId].specular[2]);
         glUniform1i(
-                glGetUniformLocation(renderer->gpuProgram, "myTextureSampler"), 0);
+            glGetUniformLocation(renderer->gpuProgram, "myTextureSampler"), 0);
         checkForGLError();
-        glDrawRangeElementsBaseVertex(renderer->sceneNodes[i].primative_mode, renderer->sceneNodes[i].start_position,
-                renderer->sceneNodes[i].end_position, (renderer->sceneNodes[i].end_position - renderer->sceneNodes[i].start_position),
-                GL_UNSIGNED_INT, (void*) (0), renderer->sceneNodes[i].start_position);
+        glDrawRangeElementsBaseVertex(renderer->sceneNodes[i].primativeMode, renderer->sceneNodes[i].startPosition,
+                                      renderer->sceneNodes[i].endPosition, (renderer->sceneNodes[i].endPosition - renderer->sceneNodes[i].startPosition),
+                                      GL_UNSIGNED_INT, (void*) (0), renderer->sceneNodes[i].startPosition);
 
-        checkForGLError();
     }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -569,6 +569,4 @@ void Renderer_render(Renderer* renderer, Camera* camera)
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(2);
     glBindVertexArray(0);
-
-    checkForGLError();
 }

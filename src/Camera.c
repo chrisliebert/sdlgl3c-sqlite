@@ -22,6 +22,7 @@ void Camera_aim(Camera* camera, float x, float y)
 
 void Camera_init(Camera* camera)
 {
+    GLint mViewport[4];
     camera->position[0] = 0.f;
     camera->position[1] = 1.f;
     camera->position[2] = 5.f;
@@ -32,7 +33,7 @@ void Camera_init(Camera* camera)
     camera->up[2] = 0.f;
     camera->speed = 0.025f;
     /* Get viewport */
-    GLint mViewport[4];
+
     glGetIntegerv( GL_VIEWPORT, mViewport);
 
     /* Set up Projection and ModelView matrices */
@@ -72,5 +73,5 @@ void Camera_moveRight(Camera* camera, float amount)
 void Camera_update(Camera* camera)
 {
     Matrix_lookAt(&camera->modelViewMatrix, camera->position[0], camera->position[1], camera->position[2], camera->position[0] + camera->direction[0],
-            camera->position[1] + camera->direction[1], camera->position[2] + camera->direction[2], camera->up[0], camera->up[1], camera->up[2]);
+                  camera->position[1] + camera->direction[1], camera->position[2] + camera->direction[2], camera->up[0], camera->up[1], camera->up[2]);
 }

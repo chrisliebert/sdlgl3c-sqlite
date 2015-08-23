@@ -8,17 +8,18 @@
 /* Fix static analysis for eclipse */
 #undef __cplusplus
 
-#define _DEBUG 1
-#define USE_GLEW 1
-#ifdef _WIN32
-#define GLEW_STATIC 1
-#endif
+#define _DEBUG 1 /* TODO: integrate with cmake */
 
 #ifdef _DEBUG
 #include <assert.h>
 #else
 #define assert(A) (void*)(0 * A)
-#endif // _DEBUG
+#endif /* _DEBUG */
+
+#define USE_GLEW 1
+#ifdef _WIN32
+#define GLEW_STATIC 1
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -44,8 +45,10 @@
 
 #define MAX_SHADER_LOG_LENGTH 1000
 #define MAX_FILENAME_LENGTH 1000
+#define MAX_LOG_LENGTH 1000
 
-#define Log(A,...)  printf(A,##__VA_ARGS__);
+#define Log(A,...)          char _log_msg[MAX_LOG_LENGTH]; sprintf(_log_msg,A,##__VA_ARGS__); infoMsg(_log_msg);
+
 #define Log_error(A,...)    fprintf(stderr,A,##__VA_ARGS__);
 
-#endif
+#endif /* _COMMON_H_ */

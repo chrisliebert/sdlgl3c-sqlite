@@ -12,11 +12,16 @@ void errorMsg(const char* title)
 
 void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
 {
+    Uint32 flags;
+    GLint viewport[4];
+    /* Get largest anisotropic filtering level */
+    GLfloat fLargest;
+
     app->mouseSpeed = 0.001f;
     app->runLevel = 1;
-    app->lastTime = SDL_GetTicks();
     app->deltaTime = 0;
     app->window = 0;
+    app->lastTime = SDL_GetTicks();
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
@@ -25,7 +30,6 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
     }
     else
     {
-
         /* Manually set the OpenGL context version
          SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
          SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -38,9 +42,10 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
+
         Renderer_init(&app->renderer, dbFileName);
 
-        Uint32 flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN; /* | SDL_WINDOW_FULLSCREEN; */
+        flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN; /* | SDL_WINDOW_FULLSCREEN; */
         app->window = SDL_CreateWindow("", 300, 100, 800, 600, flags);
         if (app->window == NULL)
         {
@@ -51,6 +56,10 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
         }
         else
         {
+            GLenum err;
+            char* errorStr;
+            int initted = 0;
+
             app->glContext = SDL_GL_CreateContext(app->window);
             if (app->glContext == NULL)
             {
@@ -65,22 +74,27 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
             /* Initialize GLEW */
 #ifdef USE_GLEW
             glewExperimental = GL_TRUE;
-            GLenum err = glewInit();
+            err = glewInit();
             checkForGLError();
             if (GLEW_OK != err)
             {
                 Log_error("Error: %s\n", glewGetErrorString(err));
-                const char* errorStr = (char*) glewGetErrorString(err);
+                errorStr = (char*) glewGetErrorString(err);
                 errorMsg(errorStr);
                 free((void*)errorStr);
             }
 #endif
+
+            glClearColor(0.5f, 0.5, 0.5, 1.0);
+            glClear(GL_COLOR_BUFFER_BIT);
+            SDL_GL_SwapWindow(app->window);
+
             Renderer_buildScene(&app->renderer);
             Renderer_bufferToGPU(&app->renderer);
             Log("OpenGL %s\n", glGetString(GL_VERSION));
 
-            int flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
-            int initted = IMG_Init(flags);
+            flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
+            initted = IMG_Init(flags);
             if ((initted & flags) != flags)
             {
                 Log_error("IMG_Init: Failed to init required jpg and png support!\n");
@@ -105,7 +119,6 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
         checkForGLError();
 
         /* Get largest anisotropic filtering level */
-        GLfloat fLargest;
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &fLargest);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, fLargest);
         checkForGLError();
@@ -118,7 +131,6 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
         glClearColor(0.5, 0.5, 0.5, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         Camera_init(&app->camera);
-        GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
         glViewport(0, 0, viewport[2], viewport[3]);
         SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
@@ -153,8 +165,15 @@ void SDLGLApp_keyUp(SDLGLApp* app, SDL_Keycode key)
 
 void SDLGLApp_start(SDLGLApp* app)
 {
+    GLint viewport[4];
+    double width, height;
+    double xpos, ypos;
+    int x, y;
+    double currentTime;
+
     while (app->runLevel > 0)
     {
+        const Uint8 *keys = SDL_GetKeyboardState(NULL);
         SDL_PollEvent(&app->event);
 
         if (app->event.type == SDL_QUIT)
@@ -174,8 +193,6 @@ void SDLGLApp_start(SDLGLApp* app)
         {
             SDLGLApp_keyUp(app, app->event.key.keysym.sym);
         }
-
-        const Uint8 *keys = SDL_GetKeyboardState(NULL);
 
         if (keys[SDL_SCANCODE_W])
         {
@@ -197,24 +214,18 @@ void SDLGLApp_start(SDLGLApp* app)
             Camera_moveLeft(&app->camera, app->deltaTime);
         }
 
-        GLint viewport[4];
+
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        double width = (double)viewport[2];
-        double height = (double)viewport[3];
+        width = (double)viewport[2];
+        height = (double)viewport[3];
 
         /* Get mouse position */
-        double xpos, ypos;
-        int x, y;
         SDL_GetMouseState(&x, &y);
 
-
-        // Ignore mouse input less than 2 pixels from origin (smoothing)
+        /* Ignore mouse input less than 2 pixels from origin (smoothing) */
         if(abs(x - (int)floor(viewport[2]/2.0)) < 2) x = (int)floor(viewport[2]/2.0);
         if(abs(y - (int)floor(viewport[3]/2.0)) < 2) y = (int)floor(viewport[3]/2.0);
-
-        //if(abs(x - viewport[2]) < 3) x = floor(width/2.0);
-        //if(abs(y - viewport[3]) < 3) y = floor(height/2.0);
 
         xpos = (double) x;
         ypos = (double) y;
@@ -224,11 +235,9 @@ void SDLGLApp_start(SDLGLApp* app)
         SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
 
         /* Compute time difference between current and last frame */
-        double currentTime = SDL_GetTicks();
+        currentTime = SDL_GetTicks();
         app->deltaTime = (float) (currentTime - app->lastTime);
-
         Camera_aim(&app->camera, app->mouseSpeed * (float) (floor(width / 2.0) - xpos), app->mouseSpeed * (float) (floor(height / 2.0) - ypos));
-
         Camera_update(&app->camera);
         app->lastTime = currentTime;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -2,9 +2,9 @@
 
 float* Matrix_getOneDimensionalArray(Matrix* matrix)
 {
-	float *a = NULL;
-	a = malloc(16 * sizeof(float));
-	assert(a);
+    float *a = NULL;
+    a = malloc(16 * sizeof(float));
+    assert(a);
     a[0] = matrix->m[0][0];
     a[1] = matrix->m[0][1];
     a[2] = matrix->m[0][2];
@@ -21,7 +21,7 @@ float* Matrix_getOneDimensionalArray(Matrix* matrix)
     a[13] = matrix->m[3][1];
     a[14] = matrix->m[3][2];
     a[15] = matrix->m[3][3];
-	return a;
+    return a;
 }
 
 void Matrix_scale(Matrix* result, float sx, float sy, float sz)
@@ -168,23 +168,24 @@ void Matrix_ortho(Matrix* result, float left, float right, float bottom, float t
 /* Todo: apply optimal 2^38 n algorithm */
 void Matrix_multiply(Matrix* result, Matrix* srcA, Matrix* srcB)
 {
-	Matrix tmp;
-    Matrix_loadIdentity(result);
+    Matrix tmp;
     int i;
+
+    Matrix_loadIdentity(result);
 
     for (i = 0; i < 4; i++)
     {
         tmp.m[i][0] = (srcA->m[i][0] * srcB->m[0][0]) + (srcA->m[i][1] * srcB->m[1][0]) + (srcA->m[i][2] * srcB->m[2][0])
-                + (srcA->m[i][3] * srcB->m[3][0]);
+                      + (srcA->m[i][3] * srcB->m[3][0]);
 
         tmp.m[i][1] = (srcA->m[i][0] * srcB->m[0][1]) + (srcA->m[i][1] * srcB->m[1][1]) + (srcA->m[i][2] * srcB->m[2][1])
-                + (srcA->m[i][3] * srcB->m[3][1]);
+                      + (srcA->m[i][3] * srcB->m[3][1]);
 
         tmp.m[i][2] = (srcA->m[i][0] * srcB->m[0][2]) + (srcA->m[i][1] * srcB->m[1][2]) + (srcA->m[i][2] * srcB->m[2][2])
-                + (srcA->m[i][3] * srcB->m[3][2]);
+                      + (srcA->m[i][3] * srcB->m[3][2]);
 
         tmp.m[i][3] = (srcA->m[i][0] * srcB->m[0][3]) + (srcA->m[i][1] * srcB->m[1][3]) + (srcA->m[i][2] * srcB->m[2][3])
-                + (srcA->m[i][3] * srcB->m[3][3]);
+                      + (srcA->m[i][3] * srcB->m[3][3]);
     }
 
     memcpy(result, &tmp, sizeof(Matrix));

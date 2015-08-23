@@ -25,4 +25,7 @@ void SDLGLApp_init(SDLGLApp*, const char*);
 void SDLGLApp_start(SDLGLApp*);
 void SDLGLApp_destroy(SDLGLApp*);
 
+void infoMsg(const char*);
+void errorMsg(const char*);
+
 #endif /* _SDLGLAPP_H_ */

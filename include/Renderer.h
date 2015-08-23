@@ -28,25 +28,25 @@ typedef struct
     /* illumination model (see http://www.fileformat.info/format/material/) */
     int illum;
     /* Texture file names */
-    char ambient_texture_name[64];
-    char diffuse_texture_name[64];
-    char specular_texture_name[64];
-    char normal_texture_name[64];
+    char ambientTextureName[64];
+    char diffuseTextureName[64];
+    char specularTextureName[64];
+    char normalTextureName[64];
 } Material;
 
 typedef struct
 {
     char name[64];
-    int material_id;
-    Matrix model_view_matrix;
-    GLuint start_position;
-    GLuint end_position;
-    GLenum primative_mode;
-    GLuint ambient_texture_id;
-    GLuint diffuse_texture_id;
-    GLuint normal_texture_id;
-    GLuint specular_texture_id;
-    GLfloat bounding_sphere;
+    int materialId;
+    Matrix modelViewMatrix;
+    GLuint startPosition;
+    GLuint endPosition;
+    GLenum primativeMode;
+    GLuint ambientTextureId;
+    GLuint diffuseTextureId;
+    GLuint normalTextureId;
+    GLuint specularTextureId;
+    GLfloat boundingSphere;
 } SceneNode;
 
 typedef struct Vertex
@@ -71,7 +71,7 @@ typedef struct Renderer
     VertexShader vertShader;
     FragmentShader fragShader;
     char* dbFileName;
-	bool useFixedFunctionLegacyMode; // Disable shaders and used OpenGL 1 immediate mode
+    bool useFixedFunctionLegacyMode; /* Disable shaders and used OpenGL 1 immediate mode */
 } Renderer;
 
 void Renderer_bufferToGPU(Renderer*);

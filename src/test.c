@@ -5,6 +5,7 @@
 
 void testRenderer(Renderer* r)
 {
+    assert(r);
     /* Assert data is loaded */
     assert(r->vertexDataSize > 0);
     assert(r->vertexData != 0);
@@ -18,24 +19,32 @@ void testRenderer(Renderer* r)
 
 void runTests(SDLGLApp* a)
 {
+    assert(a);
     testRenderer(&a->renderer);
 }
 
 int main(int argc, char** argv)
 {
-	SDLGLApp app;
+    SDLGLApp app;
     char dbFile[100];
+
+    if(argc != 2)
+    {
+        Log_error("Usage: %s <file.db>\n", argv[0]);
+        return 5;
+    }
+
     dbFile[0] = '\0';
     strcat(dbFile, MODEL_DIRECTORY);
     strcat(dbFile, DIRECTORY_SEPARATOR);
-    strcat(dbFile, "thecity.db");
-    SDLGLApp_init(&app, dbFile);
+    strcat(dbFile, argv[1]);
+    SDLGLApp_init(&app, "portland.db");
     Log("Scene loaded\n");
-	app.runLevel = -1;
+    app.runLevel = -1;
     SDLGLApp_start(&app);
     Log("Scene rendered once\nRunning assertions\n");
     runTests(&app);
     SDLGLApp_destroy(&app);
     Log("Test passed\n");
-    return (0);
+    return 0;
 }

@@ -30,10 +30,10 @@ void VertexShader_destroy(VertexShader* shader)
 
 void FragmentShader_createShader(FragmentShader* shader)
 {
+    GLint shaderCompiled;
     shader->id = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(shader->id, 1, &shader->shaderSrc, 0);
     glCompileShader(shader->id);
-    GLint shaderCompiled;
 
     glGetShaderiv(shader->id, GL_COMPILE_STATUS, &shaderCompiled);
 
@@ -61,10 +61,10 @@ void FragmentShader_createShader(FragmentShader* shader)
 
 void VertexShader_createShader(VertexShader* shader)
 {
+    GLint shaderCompiled;
     shader->id = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(shader->id, 1, &shader->shaderSrc, 0);
     glCompileShader(shader->id);
-    GLint shaderCompiled;
 
     glGetShaderiv(shader->id, GL_COMPILE_STATUS, &shaderCompiled);
 
@@ -92,36 +92,36 @@ void VertexShader_createShader(VertexShader* shader)
 
 char* readFile(const char* filename)
 {
-	FILE *stream = NULL;
-	char *contents = NULL;
-	int fileSize = 0;
-	stream = fopen(filename, "r");
-	if (stream == 0)
-	{
-		Log_error("Unable to load %s\n", filename);
-		exit(2);
-	}
+    FILE *stream = NULL;
+    size_t size = 0;
+    char *contents = NULL;
+    int fileSize = 0;
+    stream = fopen(filename, "r");
+    if (stream == 0)
+    {
+        Log_error("Unable to load %s\n", filename);
+        exit(2);
+    }
 
-	fseek(stream, 0L, SEEK_END);
-	fileSize = ftell(stream);
-	fseek(stream, 0L, SEEK_SET);
-	contents = malloc(fileSize + 1);
-	assert(contents);
-	size_t size = 0;
-	size = fread(contents, 1, fileSize + 1, stream);
-	contents[size] = 0; // Add terminating zero.
-	fclose(stream);
-	return contents;
+    fseek(stream, 0L, SEEK_END);
+    fileSize = ftell(stream);
+    fseek(stream, 0L, SEEK_SET);
+    contents = malloc(fileSize + 1);
+    assert(contents);
+    size = fread(contents, 1, fileSize + 1, stream);
+    contents[size] = 0; /* Add terminating zero. */
+    fclose(stream);
+    return contents;
 }
 
 void Shader_load(Shader* shader, const char* filePath)
 {
     char* filePathTmp = malloc(sizeof(char) * strlen(filePath));
-	assert(filePathTmp);
+    char* shaderSrcTmp = readFile(filePath);
+    assert(filePathTmp);
     filePathTmp[0] = '\0';
     strcpy(filePathTmp, filePath);
     shader->filePath = &filePathTmp[0];
-    char* shaderSrcTmp = readFile(filePath);
     shader->shaderSrc = &shaderSrcTmp[0];
 }
 
