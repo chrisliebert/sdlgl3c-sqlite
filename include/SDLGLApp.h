@@ -3,7 +3,7 @@
 
 #include "Renderer.h"
 
-typedef struct SDLGLApp
+DLL typedef struct SDLGLApp
 {
     SDL_Window* window;
     Renderer renderer;
@@ -21,11 +21,8 @@ typedef struct SDLGLApp
     double lastTime;
 } SDLGLApp;
 
-void SDLGLApp_init(SDLGLApp*, const char*);
-void SDLGLApp_start(SDLGLApp*);
-void SDLGLApp_destroy(SDLGLApp*);
-
-void infoMsg(const char*);
-void errorMsg(const char*);
+DLL void SDLGLApp_init(SDLGLApp*, const char*);
+DLL void SDLGLApp_start(SDLGLApp*);
+DLL void SDLGLApp_destroy(SDLGLApp*);
 
 #endif /* _SDLGLAPP_H_ */
