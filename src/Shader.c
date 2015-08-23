@@ -92,29 +92,32 @@ void VertexShader_createShader(VertexShader* shader)
 
 char* readFile(const char* filename)
 {
-    FILE *stream;
-    char *contents;
-    int fileSize = 0;
-    stream = fopen(filename, "r");
-    if(stream == 0)
-    {
-        Log_error("Unable to load %s\n", filename);
-        exit(2);
-    }
+	FILE *stream = NULL;
+	char *contents = NULL;
+	int fileSize = 0;
+	stream = fopen(filename, "r");
+	if (stream == 0)
+	{
+		Log_error("Unable to load %s\n", filename);
+		exit(2);
+	}
 
-    fseek(stream, 0L, SEEK_END);
-    fileSize = ftell(stream);
-    fseek(stream, 0L, SEEK_SET);
-    contents = malloc(fileSize+1);
-    size_t size=fread(contents,1,fileSize,stream);
-    contents[size]=0; // Add terminating zero.
-    fclose(stream);
-    return contents;
+	fseek(stream, 0L, SEEK_END);
+	fileSize = ftell(stream);
+	fseek(stream, 0L, SEEK_SET);
+	contents = malloc(fileSize + 1);
+	assert(contents);
+	size_t size = 0;
+	size = fread(contents, 1, fileSize + 1, stream);
+	contents[size] = 0; // Add terminating zero.
+	fclose(stream);
+	return contents;
 }
 
 void Shader_load(Shader* shader, const char* filePath)
 {
     char* filePathTmp = malloc(sizeof(char) * strlen(filePath));
+	assert(filePathTmp);
     filePathTmp[0] = '\0';
     strcpy(filePathTmp, filePath);
     shader->filePath = &filePathTmp[0];

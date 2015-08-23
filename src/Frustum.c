@@ -46,7 +46,7 @@ void Frustum_extractFrustum(Frustum* frustum, Matrix* modelViewMatrix, Matrix* p
     frustum->f[0][3] = clip[15] - clip[12];
 
     /* Normalize the result */
-    t = sqrt(frustum->f[0][0] * frustum->f[0][0] + frustum->f[0][1] * frustum->f[0][1] + frustum->f[0][2] * frustum->f[0][2]);
+    t = (float)sqrt(frustum->f[0][0] * frustum->f[0][0] + frustum->f[0][1] * frustum->f[0][1] + frustum->f[0][2] * frustum->f[0][2]);
     frustum->f[0][0] /= t;
     frustum->f[0][1] /= t;
     frustum->f[0][2] /= t;
@@ -59,7 +59,7 @@ void Frustum_extractFrustum(Frustum* frustum, Matrix* modelViewMatrix, Matrix* p
     frustum->f[1][3] = clip[15] + clip[12];
 
     /* Normalize the result */
-    t = sqrt(frustum->f[1][0] * frustum->f[1][0] + frustum->f[1][1] * frustum->f[1][1] + frustum->f[1][2] * frustum->f[1][2]);
+    t = (float)sqrt(frustum->f[1][0] * frustum->f[1][0] + frustum->f[1][1] * frustum->f[1][1] + frustum->f[1][2] * frustum->f[1][2]);
     frustum->f[1][0] /= t;
     frustum->f[1][1] /= t;
     frustum->f[1][2] /= t;
@@ -72,7 +72,7 @@ void Frustum_extractFrustum(Frustum* frustum, Matrix* modelViewMatrix, Matrix* p
     frustum->f[2][3] = clip[15] + clip[13];
 
     /* Normalize the result */
-    t = sqrt(frustum->f[2][0] * frustum->f[2][0] + frustum->f[2][1] * frustum->f[2][1] + frustum->f[2][2] * frustum->f[2][2]);
+    t = (float)sqrt(frustum->f[2][0] * frustum->f[2][0] + frustum->f[2][1] * frustum->f[2][1] + frustum->f[2][2] * frustum->f[2][2]);
     frustum->f[2][0] /= t;
     frustum->f[2][1] /= t;
     frustum->f[2][2] /= t;
@@ -85,7 +85,7 @@ void Frustum_extractFrustum(Frustum* frustum, Matrix* modelViewMatrix, Matrix* p
     frustum->f[3][3] = clip[15] - clip[13];
 
     /* Normalize the result */
-    t = sqrt(frustum->f[3][0] * frustum->f[3][0] + frustum->f[3][1] * frustum->f[3][1] + frustum->f[3][2] * frustum->f[3][2]);
+    t = (float)sqrt(frustum->f[3][0] * frustum->f[3][0] + frustum->f[3][1] * frustum->f[3][1] + frustum->f[3][2] * frustum->f[3][2]);
     frustum->f[3][0] /= t;
     frustum->f[3][1] /= t;
     frustum->f[3][2] /= t;
@@ -98,7 +98,7 @@ void Frustum_extractFrustum(Frustum* frustum, Matrix* modelViewMatrix, Matrix* p
     frustum->f[4][3] = clip[15] - clip[14];
 
     /* Normalize the result */
-    t = sqrt(frustum->f[4][0] * frustum->f[4][0] + frustum->f[4][1] * frustum->f[4][1] + frustum->f[4][2] * frustum->f[4][2]);
+    t = (float)sqrt(frustum->f[4][0] * frustum->f[4][0] + frustum->f[4][1] * frustum->f[4][1] + frustum->f[4][2] * frustum->f[4][2]);
     frustum->f[4][0] /= t;
     frustum->f[4][1] /= t;
     frustum->f[4][2] /= t;
@@ -111,7 +111,7 @@ void Frustum_extractFrustum(Frustum* frustum, Matrix* modelViewMatrix, Matrix* p
     frustum->f[5][3] = clip[15] + clip[14];
 
     /* Normalize the result */
-    t = sqrt(frustum->f[5][0] * frustum->f[5][0] + frustum->f[5][1] * frustum->f[5][1] + frustum->f[5][2] * frustum->f[5][2]);
+    t = (float)sqrt(frustum->f[5][0] * frustum->f[5][0] + frustum->f[5][1] * frustum->f[5][1] + frustum->f[5][2] * frustum->f[5][2]);
     frustum->f[5][0] /= t;
     frustum->f[5][1] /= t;
     frustum->f[5][2] /= t;

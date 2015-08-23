@@ -59,12 +59,9 @@ typedef struct Vertex
 typedef struct Renderer
 {
     GLuint vao, vbo, ibo;
-    GLuint startPosition;
-    Matrix modelViewProjectionMatrix;
     GLuint gpuProgram;
     Vertex* vertexData;
     int vertexDataSize;
-    Frustum frustum;
     SceneNode* sceneNodes;
     int numSceneNodes;
     GLuint* indices;
@@ -74,6 +71,7 @@ typedef struct Renderer
     VertexShader vertShader;
     FragmentShader fragShader;
     char* dbFileName;
+	bool useFixedFunctionLegacyMode; // Disable shaders and used OpenGL 1 immediate mode
 } Renderer;
 
 void Renderer_bufferToGPU(Renderer*);

@@ -5,14 +5,14 @@ void Camera_aim(Camera* camera, float x, float y)
     camera->horizontalAngle += x;
     camera->verticalAngle += y;
 
-    camera->direction[0] = cos(camera->verticalAngle) * sin(camera->horizontalAngle);
-    camera->direction[1] = sin(camera->verticalAngle);
-    camera->direction[2] = cos(camera->verticalAngle) * cos(camera->horizontalAngle);
+    camera->direction[0] = (float)(cos(camera->verticalAngle) * sin(camera->horizontalAngle));
+    camera->direction[1] = (float)(sin(camera->verticalAngle));
+    camera->direction[2] = (float)(cos(camera->verticalAngle) * cos(camera->horizontalAngle));
 
     /* Right vector */
-    camera->right[0] = sin(camera->horizontalAngle - 3.14f / 2.0f);
-    camera->right[1] = 0;
-    camera->right[2] = cos(camera->horizontalAngle - 3.14f / 2.0f);
+    camera->right[0] = (float)sin(camera->horizontalAngle - 3.14f / 2.0f);
+    camera->right[1] = 0.f;
+    camera->right[2] = (float)cos(camera->horizontalAngle - 3.14f / 2.0f);
 
     /* Up vector */
 
@@ -30,7 +30,7 @@ void Camera_init(Camera* camera)
     camera->up[0] = 0.f;
     camera->up[1] = 1.f;
     camera->up[2] = 0.f;
-    camera->speed = 0.15;
+    camera->speed = 0.025f;
     /* Get viewport */
     GLint mViewport[4];
     glGetIntegerv( GL_VIEWPORT, mViewport);

@@ -7,7 +7,7 @@ void _checkForGLError(const char *file, int line)
     GLenum err = glGetError();
     while (err != GL_NO_ERROR)
     {
-        char *error = malloc(sizeof(char) * 40);
+		char error[40];
         error[0] = '\0';
         numErrors++;
         switch (err)
@@ -20,7 +20,6 @@ void _checkForGLError(const char *file, int line)
             break;
         case GL_INVALID_VALUE:
             strcpy(error, "INVALID_VALUE");
-            error = "INVALID_VALUE";
             break;
         case GL_OUT_OF_MEMORY:
             strcpy(error, "OUT_OF_MEMORY");
@@ -31,7 +30,6 @@ void _checkForGLError(const char *file, int line)
         }
 
         Log_error("GL_%s - %s : %i\n", error, file, line);
-        free(error);
         if (numErrors > 50)
         {
             exit(1);
@@ -42,7 +40,6 @@ void _checkForGLError(const char *file, int line)
 
 void Renderer_init(Renderer* renderer, const char* dbFileName)
 {
-    renderer->startPosition = 0;
     renderer->vao = renderer->vbo = renderer->ibo = 0;
     renderer->numIndices = 0;
     renderer->indices = 0;
@@ -54,21 +51,26 @@ void Renderer_init(Renderer* renderer, const char* dbFileName)
     renderer->materials = 0;
     renderer->dbFileName = 0;
     renderer->dbFileName = malloc((strlen(dbFileName) + 1) * sizeof(char));
+	assert(renderer->dbFileName);
     renderer->dbFileName[0] = '\0';
-    strcpy(renderer->dbFileName, dbFileName);
-    Matrix_loadIdentity(&renderer->modelViewProjectionMatrix);
+	strcpy(renderer->dbFileName, dbFileName);
+	renderer->useFixedFunctionLegacyMode = false;
 }
 
 void Renderer_destroy(Renderer* renderer)
 {
-    if (renderer->numSceneNodes > 0)
-    {
-        glDeleteBuffers(1, &renderer->vbo);
-        glDeleteBuffers(1, &renderer->ibo);
-        glDeleteVertexArrays(1, &renderer->vao);
-    }
-    FragmentShader_destroy(&renderer->fragShader);
-    VertexShader_destroy(&renderer->vertShader);
+	if (!renderer->useFixedFunctionLegacyMode) {
+		if (renderer->numSceneNodes > 0)
+		{
+			glDeleteBuffers(1, &renderer->vbo);
+			glDeleteBuffers(1, &renderer->ibo);
+			glDeleteVertexArrays(1, &renderer->vao);
+		}
+
+		FragmentShader_destroy(&renderer->fragShader);
+		VertexShader_destroy(&renderer->vertShader);
+	}
+
     if (renderer->vertexData && renderer->vertexDataSize > 0)
     {
         free(renderer->vertexData);
@@ -95,6 +97,7 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
     sqlite3_stmt *pStmt;
     int rc;
 
+
     do
     {
         rc = sqlite3_prepare(db, zSql, -1, &pStmt, 0);
@@ -104,20 +107,18 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
         {
             unsigned char* buffer = 0;
             buffer = malloc(sizeof(unsigned char) * sqlite3_column_bytes(pStmt, 0));
+			assert(buffer);
             memcpy(buffer, sqlite3_column_blob(pStmt, 0), sqlite3_column_bytes(pStmt, 0));
 
             SDL_RWops *rw = 0;
             rw = SDL_RWFromMem( buffer, (sizeof(unsigned char) * sqlite3_column_bytes(pStmt, 0)) );
 
-
-            //SDL_Surface* image = IMG_Load_RW(rw, 1);
-
-            //textureFileName
             char fileExtension[4];
-            fileExtension[3] = '\0';
-            int exOffset = strlen(textureFileName) - 3;
+
+            int exOffset = (int)(strlen(textureFileName) - 3);
             const char* extensionPtr = &textureFileName[exOffset];
             strncpy(&fileExtension[0], extensionPtr, 3);
+			fileExtension[3] = '\0';
 
             //fix for .xv images
             if(strcmp(fileExtension, ".xv") == 0)
@@ -134,7 +135,6 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
                 Log_error("Unable to load bitmap: %s\n", SDL_GetError());
                 exit(1);
             }
-
             glGenTextures(1, textureId);
             glBindTexture(GL_TEXTURE_2D, *textureId);
             int mode = GL_RGB;
@@ -143,10 +143,13 @@ void addTexture(Renderer* renderer, const char* textureFileName, GLuint *texture
                 mode = GL_RGBA;
                 /* SDL_SetColorKey(image, SDL_RLEACCEL, image->format->colorkey   ); */
             }
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
             glTexImage2D(GL_TEXTURE_2D, 0, mode, image->w, image->h, 0, mode,
                     GL_UNSIGNED_BYTE, image->pixels);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 
             /* Free the temporary surface */
             /* SDL_free(rw); */
@@ -272,6 +275,7 @@ void Renderer_buildScene(Renderer* renderer)
 
     renderer->numMaterials = getNumRows(db, stmt, &rc, "material");
     renderer->materials = malloc(renderer->numMaterials * sizeof(Material));
+	assert(renderer->materials);
     i = 0;
     while (rc != SQLITE_DONE)
     {
@@ -287,7 +291,9 @@ void Renderer_buildScene(Renderer* renderer)
             break;
         }
 
-        Material *m = &renderer->materials[i];
+		Material *m = NULL;
+		m = &renderer->materials[i];
+		assert(m);
 
         strcpy(m->name, (char*) sqlite3_column_text(stmt, 1));
         strcpy(m->normal_texture_name, (char*) sqlite3_column_text(stmt, 2));
@@ -321,6 +327,7 @@ void Renderer_buildScene(Renderer* renderer)
     i = 0;
     renderer->numSceneNodes = getNumRows(db, stmt, &rc, "scene_node");
     renderer->sceneNodes = malloc(sizeof(SceneNode) * renderer->numSceneNodes);
+	assert(renderer->sceneNodes);
 
     while (rc != SQLITE_DONE)
     {
@@ -336,7 +343,9 @@ void Renderer_buildScene(Renderer* renderer)
             break;
         }
 
-        SceneNode* scene_node = &renderer->sceneNodes[i];
+		SceneNode* scene_node = NULL;
+		scene_node = &renderer->sceneNodes[i];
+		assert(scene_node);
         strcpy(scene_node->name, (char*) sqlite3_column_text(stmt, 1));
         scene_node->material_id = sqlite3_column_int(stmt, 2);
         scene_node->start_position = sqlite3_column_int(stmt, 3);
@@ -348,6 +357,7 @@ void Renderer_buildScene(Renderer* renderer)
     sqlite3_finalize(stmt);
 
     renderer->indices = malloc(sizeof(GLuint) * renderer->numIndices);
+	assert(renderer->indices);
     for (i = 0; i < renderer->numIndices + 1; i++)
     {
         renderer->indices[i] = i;
@@ -375,6 +385,9 @@ void Renderer_buildScene(Renderer* renderer)
 
 void Renderer_bufferToGPU(Renderer* renderer)
 {
+	if (renderer->useFixedFunctionLegacyMode) {
+		return; /* VBOs disabled in immediate mode */
+	}
     /* Allocate and assign a Vertex Array Object to handle */
     glGenVertexArrays(1, &renderer->vao);
     /* Bind Vertex Array Object as the current used object */
@@ -419,6 +432,51 @@ void Renderer_bufferToGPU(Renderer* renderer)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+/* Rendering call for legacy graphics cards without support for shaders */
+void fixedFunctionRender(Renderer* renderer, Camera* camera)
+{
+	int i;
+	GLuint vertexIndex;
+
+	/* Set the projection and modelview matrices */
+	//TODO: move to resize() function
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glLoadMatrixf((GLfloat*)&camera->projectionMatrix.m);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glLoadMatrixf((GLfloat*)&camera->modelViewMatrix.m);
+
+
+	glEnable(GL_TEXTURE_2D);
+	checkForGLError();
+
+
+	for (i = 0; i < renderer->numSceneNodes; i++) {
+		SceneNode* node = &renderer->sceneNodes[i];
+		Material* material = &renderer->materials[node->material_id];
+		//glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat*)&material->diffuse);
+
+		//glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_TEXTURE0);
+		//glActiveTexture(GL_TEXTURE0);
+
+		glBindTexture(GL_TEXTURE_2D, renderer->sceneNodes[i].diffuse_texture_id);
+
+		glBegin(GL_TRIANGLES);
+		for (vertexIndex = node->start_position; vertexIndex < node->end_position; vertexIndex++) {
+			Vertex* v = &renderer->vertexData[vertexIndex];
+			glVertex3fv((GLfloat*)&v->vertex);
+			glNormal3fv((GLfloat*)&v->normal);
+			glTexCoord2f(v->texcoord[0], v->texcoord[1]); // TODO: Fix offset error
+		}
+		glEnd();
+	}
+
+	glFlush();
+}
+
 void Renderer_render(Renderer* renderer, Camera* camera)
 {
     int i;
@@ -429,6 +487,13 @@ void Renderer_render(Renderer* renderer, Camera* camera)
         exit(1);
         return;
     }
+
+	glActiveTexture(GL_TEXTURE0);
+
+	if (renderer->useFixedFunctionLegacyMode) {
+		fixedFunctionRender(renderer, camera);
+		return;
+	}
 
     checkForGLError();
     glBindVertexArray(renderer->vao);
@@ -457,7 +522,6 @@ void Renderer_render(Renderer* renderer, Camera* camera)
         float lightPos[3] = { 10.f, 135.f, 0.f };
         checkForGLError();
 
-        glActiveTexture(GL_TEXTURE0);
         checkForGLError();
         glBindTexture(GL_TEXTURE_2D, renderer->sceneNodes[i].diffuse_texture_id);
         checkForGLError();

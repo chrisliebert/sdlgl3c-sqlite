@@ -16,6 +16,7 @@ float* Vec3_scaled(float* a, float c)
 {
     int i;
     float* result = malloc(sizeof(float) * 3);
+	assert(result);
     assert(a);
     for(i = 0; i<3; i++)
     {

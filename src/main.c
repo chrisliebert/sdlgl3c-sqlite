@@ -13,8 +13,8 @@ int main(int argc, char** argv)
     strcat(dbFile, MODEL_DIRECTORY);
     strcat(dbFile, DIRECTORY_SEPARATOR);
     strcat(dbFile, argv[1]);
-    SDLGLApp_init(&app, dbFile);
-    SDLGLApp_start(&app);
-    SDLGLApp_destroy(&app);
+    SDLGLApp_init(app, dbFile);
+    SDLGLApp_start(app);
+    SDLGLApp_destroy(app);
     return 0;
 }

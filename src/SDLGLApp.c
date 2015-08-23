@@ -77,7 +77,7 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
 #endif
             Renderer_buildScene(&app->renderer);
             Renderer_bufferToGPU(&app->renderer);
-            /* Log("OpenGL %s\n", glGetString(GL_VERSION)); */
+            Log("OpenGL %s\n", glGetString(GL_VERSION));
 
             int flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
             int initted = IMG_Init(flags);
@@ -210,8 +210,8 @@ void SDLGLApp_start(SDLGLApp* app)
 
 
         // Ignore mouse input less than 2 pixels from origin (smoothing)
-        if(abs(x - floor(viewport[2]/2.0)) < 2) x = floor(viewport[2]/2.0);
-        if(abs(y - floor(viewport[3]/2.0)) < 2) y = floor(viewport[3]/2.0);
+        if(abs(x - (int)floor(viewport[2]/2.0)) < 2) x = (int)floor(viewport[2]/2.0);
+        if(abs(y - (int)floor(viewport[3]/2.0)) < 2) y = (int)floor(viewport[3]/2.0);
 
         //if(abs(x - viewport[2]) < 3) x = floor(width/2.0);
         //if(abs(y - viewport[3]) < 3) y = floor(height/2.0);
