@@ -1,9 +1,10 @@
 #ifndef _SDLGLAPP_H_
 #define _SDLGLAPP_H_
 
+#include "Common.h"
 #include "Renderer.h"
 
-DLL typedef struct SDLGLApp
+typedef struct SDLGLApp
 {
     SDL_Window* window;
     Renderer renderer;
@@ -21,8 +22,8 @@ DLL typedef struct SDLGLApp
     double lastTime;
 } SDLGLApp;
 
-DLL void SDLGLApp_init(SDLGLApp*, const char*);
-DLL void SDLGLApp_start(SDLGLApp*);
-DLL void SDLGLApp_destroy(SDLGLApp*);
+void SDLGLApp_init(SDLGLApp*, const char*);
+void SDLGLApp_start(SDLGLApp*);
+void SDLGLApp_destroy(SDLGLApp*);
 
 #endif /* _SDLGLAPP_H_ */

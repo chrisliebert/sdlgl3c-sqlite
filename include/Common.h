@@ -24,8 +24,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_thread.h>
 
 #ifdef USE_GLEW
 #include <GL/glew.h>
@@ -41,30 +43,6 @@
 #else
 #define DIRECTORY_SEPARATOR "/"
 #endif
-
-//#ifdef WINDOWS
-//#define DLL __declspec(dllexport)
-//#else
-//#endif
-
-#if defined(_MSC_VER)
-    //  Microsoft
-    #define EXPORT __declspec(dllexport)
-    #define IMPORT __declspec(dllimport)
-#elif defined(_GCC)
-    //  GCC
-    #define EXPORT __attribute__((visibility("default")))
-    #define IMPORT
-#else
-    //  do nothing and hope for the best?
-    #define EXPORT
-    #define IMPORT
-    #pragma warning Unknown dynamic link import/export semantics.
-#endif
-
-#define DLL EXPORT
-
-
 
 #define MAX_SHADER_LOG_LENGTH 1000
 #define MAX_FILENAME_LENGTH 1000
