@@ -24,12 +24,12 @@ typedef struct VertexShader
     const char* shaderSrc;
 } VertexShader;
 
-GLuint Shader_getId(Shader*);
+EXPORT GLuint Shader_getId(Shader*);
 
-void FragmentShader_init(FragmentShader*, const char*);
-void FragmentShader_destroy(FragmentShader*);
+EXPORT void FragmentShader_init(FragmentShader*, const char*);
+EXPORT void FragmentShader_destroy(FragmentShader*);
 
-void VertexShader_init(VertexShader*, const char*);
-void VertexShader_destroy(VertexShader*);
+EXPORT void VertexShader_init(VertexShader*, const char*);
+EXPORT void VertexShader_destroy(VertexShader*);
 
 #endif /* _SHADER_H_ */

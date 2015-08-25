@@ -27,7 +27,6 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
-#include <SDL_thread.h>
 
 #ifdef USE_GLEW
 #include <GL/glew.h>
@@ -48,21 +47,36 @@
 #define MAX_FILENAME_LENGTH 1000
 #define MAX_LOG_LENGTH 1000
 
-void infoMsg(const char*);
-void errorMsg(const char*);
+//#ifdef WINDOWS
+//#define DLL __declspec(dllexport)
+//#else
+//#endif
 
-/* Log messages with message boxes */
-char _err_msg[MAX_LOG_LENGTH];
+#if defined(_MSC_VER)
+    //  Microsoft
+    #define EXPORT __declspec(dllexport)
+    #define IMPORT __declspec(dllimport)
+#elif(__MINGW32__)
+    #define EXPORT __declspec(dllexport)
+    #define IMPORT __declspec(dllimport)
+#elif defined(_GCC)
+    //  GCC
+    #define EXPORT __declspec(dllexport)
+    #define IMPORT __declspec(dllimport)
+
+    #define EXPORT __attribute__((visibility("default")))
+    #define IMPORT
+#else
+    //  do nothing and hope for the best?
+    #define EXPORT
+    #define IMPORT
+    #pragma warning Unknown dynamic link import/export semantics.
+#endif
 
 #define Log(A)				printf(A);
 #define Logf(A,...)         printf(A,##__VA_ARGS__);
 
-#ifdef ERROR_LOG_TO_CONSOLE
-	#define Log_error(A)        fprintf(stderr,A);
-	#define Log_errorf(A,...)   fprintf(stderr,A,##__VA_ARGS__);
-#else
-	#define Log_error(A)		errorMsg(A);
-	#define Log_errorf(A,...)	_err_msg[0] = '\0'; sprintf(_err_msg,A,##__VA_ARGS__); errorMsg(_err_msg); _err_msg[0] = '\0';
-#endif
+#define Log_error(A)        fprintf(stderr,A);
+#define Log_errorf(A,...)   fprintf(stderr,A,##__VA_ARGS__);
 
 #endif /* _COMMON_H_ */

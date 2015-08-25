@@ -42,25 +42,8 @@ LINK_DIRECTORIES(${SQLITE3_LIBRARY_DIRS})
 ADD_DEFINITIONS(${OpenGL_DEFINITIONS})
 ADD_DEFINITIONS(${SQLITE3_DEFINITIONS})
 
-ADD_LIBRARY(GraphicsEngine
-	include/Camera.h
-	include/Common.h
-	include/Frustum.h
-	include/Matrix.h
-	include/Renderer.h
-	include/Shader.h
-	include/SDLGLApp_Export.h
-	include/Vec3.h
-	src/Camera.c
-	src/Frustum.c
-	src/Matrix.c
-	src/Renderer.c
-	src/Shader.c
-	src/SDLGLApp_Export.c
-	src/Vec3.c
-)
-
-ADD_LIBRARY(GraphicsEngineStatic
+IF(MSVC)
+ADD_LIBRARY(libGraphicsEngine SHARED
 	include/Camera.h
 	include/Common.h
 	include/Frustum.h
@@ -77,6 +60,25 @@ ADD_LIBRARY(GraphicsEngineStatic
 	src/SDLGLApp.c
 	src/Vec3.c
 )
+ELSE(MSVC)
+ADD_LIBRARY(GraphicsEngine SHARED
+	include/Camera.h
+	include/Common.h
+	include/Frustum.h
+	include/Matrix.h
+	include/Renderer.h
+	include/Shader.h
+	include/SDLGLApp.h
+	include/Vec3.h
+	src/Camera.c
+	src/Frustum.c
+	src/Matrix.c
+	src/Renderer.c
+	src/Shader.c
+	src/SDLGLApp.c
+	src/Vec3.c
+)
+ENDIF(MSVC)
 
 ADD_EXECUTABLE(sdlgl3c
 	src/main.c
@@ -87,13 +89,9 @@ ADD_EXECUTABLE(sdlgl3c-test
 )
 
 IF(MSVC)
-TARGET_LINK_LIBRARIES(GraphicsEngine ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES})
-TARGET_LINK_LIBRARIES(sdlgl3c-test GraphicsEngineStatic ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES})
-TARGET_LINK_LIBRARIES(sdlgl3c GraphicsEngineStatic ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES})
-ELSEIF(MINGW)
-TARGET_LINK_LIBRARIES(GraphicsEngine ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} m)
-TARGET_LINK_LIBRARIES(sdlgl3c-test GraphicsEngineStatic ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} m)
-TARGET_LINK_LIBRARIES(sdlgl3c GraphicsEngineStatic ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} m)
+TARGET_LINK_LIBRARIES(libGraphicsEngine ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES})
+TARGET_LINK_LIBRARIES(sdlgl3c-test libGraphicsEngine ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES})
+TARGET_LINK_LIBRARIES(sdlgl3c libGraphicsEngine ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES})
 ELSE(MSVC)
 TARGET_LINK_LIBRARIES(GraphicsEngine ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} m)
 TARGET_LINK_LIBRARIES(sdlgl3c-test GraphicsEngine ${SDL2_LIBRARIES} ${SDL2_image_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENGL_glu_LIBRARY} ${GLEW_LIBRARY} ${SQLITE3_LIBRARIES} m)

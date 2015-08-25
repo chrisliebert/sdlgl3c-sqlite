@@ -74,10 +74,10 @@ typedef struct Renderer
     bool useFixedFunctionLegacyMode; /* Disable shaders and used OpenGL 1 immediate mode */
 } Renderer;
 
-void Renderer_bufferToGPU(Renderer*);
-void Renderer_init(Renderer*, const char*);
-void Renderer_destroy(Renderer*);
-void Renderer_buildScene(Renderer*);
-void Renderer_render(Renderer*, Camera*);
+EXPORT void Renderer_bufferToGPU(Renderer*);
+EXPORT void Renderer_init(Renderer*, const char*);
+EXPORT void Renderer_destroy(Renderer*);
+EXPORT void Renderer_buildScene(Renderer*);
+EXPORT void Renderer_render(Renderer*, Camera*);
 
 #endif

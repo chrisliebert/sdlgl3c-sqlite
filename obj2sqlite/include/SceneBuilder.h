@@ -78,6 +78,7 @@ typedef struct
     unsigned normalTextureId;
     unsigned specularTextureId;
     float boundingSphere;
+    float x, y, z;
 } SceneNode;
 
 

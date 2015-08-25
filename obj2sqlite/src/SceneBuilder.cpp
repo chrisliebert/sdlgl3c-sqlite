@@ -31,8 +31,9 @@ std::vector<unsigned char> readFile(const char* filename)
 {
     // open the file:
     std::ifstream file(filename, std::ios::binary);
-    if(!file.is_open()) {
-       cerr << "Unable to open " << filename << endl;
+    if(!file.is_open())
+    {
+        cerr << "Unable to open " << filename << endl;
     }
 
     // read the data:
@@ -148,6 +149,10 @@ void SceneBuilder::addWavefront(const char* fileName, glm::mat4 matrix)
                     sceneNode.primativeMode = 6;//GL_TRIANGLES;
                     sceneNode.diffuseTextureId = 0;
                     sceneNode.modelViewMatrix = matrix;
+                    sceneNode.boundingSphere = 0.f;
+                    sceneNode.x = 0.f;
+                    sceneNode.y = 0.f;
+                    sceneNode.z = 0.f;
                     addSceneNode(&sceneNode);
                     mVertexData.clear();
                 }
@@ -166,7 +171,8 @@ void SceneBuilder::addWavefront(const char* fileName, glm::mat4 matrix)
                 glm::vec3 pointC;
 
                 int triangleIndex = i % 3;
-                if(triangleIndex == 0) {
+                if(triangleIndex == 0)
+                {
                     pointA = glm::vec3(v.vertex[0], v.vertex[1], v.vertex[2]);
                     pointB = glm::vec3(
                             shapes[i].mesh.positions[ 3 + shapes[i].mesh.indices[j] * 3],
@@ -184,11 +190,15 @@ void SceneBuilder::addWavefront(const char* fileName, glm::mat4 matrix)
                     v.normal[0] = (nu.y * nv.z) - (nu.z * nv.y);
                     v.normal[1] = (nu.z * nv.x) - (nu.x * nv.z);
                     v.normal[2] = (nu.x * nv.y) - (nu.y * nv.x);
-                } else if(triangleIndex == 1) {
+                }
+                else if(triangleIndex == 1)
+                {
                     v.normal[0] = shapes[i].mesh.positions[ shapes[i].mesh.indices[j] * 3 - 3 ];
                     v.normal[1] = shapes[i].mesh.positions[ shapes[i].mesh.indices[j] * 3 - 2 ];
                     v.normal[2] = shapes[i].mesh.positions[ shapes[i].mesh.indices[j] * 3 - 1 ];
-                } else if(triangleIndex == 2) {
+                }
+                else if(triangleIndex == 2)
+                {
                     v.normal[0] = shapes[i].mesh.positions[ shapes[i].mesh.indices[j] * 3 - 6 ];
                     v.normal[1] = shapes[i].mesh.positions[ shapes[i].mesh.indices[j] * 3 - 5 ];
                     v.normal[2] = shapes[i].mesh.positions[ shapes[i].mesh.indices[j] * 3 - 4 ];
@@ -201,11 +211,13 @@ void SceneBuilder::addWavefront(const char* fileName, glm::mat4 matrix)
 
             if((shapes[i].mesh.indices[j] * 2) >= shapes[i].mesh.texcoords.size())
             {
-                //std::cerr << "Unable to put texcoord in " << shapes[i].name << std::endl;
+                std::cerr << "Unable to put texcoord in " << shapes[i].name << std::endl;
                 /* fill with 0 */
                 v.textureCoordinate[0] = 0.f;
                 v.textureCoordinate[1] = 0.f;
-            } else {
+            }
+            else
+            {
                 tinyobj::mesh_t* m = &shapes[i].mesh;
                 v.textureCoordinate[0] = m->texcoords[(int)m->indices[j]*2];
                 v.textureCoordinate[1] = 1 - m->texcoords[(int)m->indices[j]*2+1]; // Account for wavefront to opengl coordinate system conversion
@@ -261,14 +273,16 @@ void SceneBuilder::buildScene()
         }
         else
         {
-            if(strlen(materials[sceneNodes[i].material.c_str()].diffuseTexName) > 0) {
+            if(strlen(materials[sceneNodes[i].material.c_str()].diffuseTexName) > 0)
+            {
 
                 /* Check for paths that are not valid (unix support for paths with \ instead of / */
 #ifndef _WIN32
 
                 for(unsigned j=0; j<strlen(materials[sceneNodes[i].material.c_str()].diffuseTexName); j++)
                 {
-                    if(materials[sceneNodes[i].material.c_str()].diffuseTexName[j] == '\\') {
+                    if(materials[sceneNodes[i].material.c_str()].diffuseTexName[j] == '\\')
+                    {
                         materials[sceneNodes[i].material.c_str()].diffuseTexName[j] = '/';
                     }
                 }
@@ -279,37 +293,40 @@ void SceneBuilder::buildScene()
         }
     }
 
-    //Calculate Bounding Sphere radius
 
+    // Calculate x, y, and z (position mean) for each object and
+    // Calculate Bounding Sphere radius
+
+    double xsum, ysum, zsum = 0.0;
     for(size_t i=0; i<sceneNodes.size(); i++)
     {
-        float r = 0;
-        for(size_t j=0; j<sceneNodes[i].vertexDataSize; j++)
-        {
+           float r = 0.f;
+           for(size_t j=0; j<sceneNodes[i].vertexDataSize; j++)
+           {
+               xsum += sceneNodes[i].vertexData[j].vertex[0];
+               ysum += sceneNodes[i].vertexData[j].vertex[1];
+               zsum += sceneNodes[i].vertexData[j].vertex[2];
 
-            int r2 = sqrt((sceneNodes[i].vertexData[j].vertex[0]*sceneNodes[i].vertexData[j].vertex[0])
-                    +(sceneNodes[i].vertexData[j].vertex[1]*sceneNodes[i].vertexData[j].vertex[1])
-                    +(sceneNodes[i].vertexData[j].vertex[2]*sceneNodes[i].vertexData[j].vertex[2]));
-            if(r2 > r)
-            {
-                r = r2;
-            }
 
-        }
-        if(r == 0)
-        {
-            std::cerr << "Warning, bounding sphere radius = 0 for " << sceneNodes[i].name << std::endl;
-        }
+               int r2 = sqrt((sceneNodes[i].vertexData[j].vertex[0]*sceneNodes[i].vertexData[j].vertex[0])
+                       +(sceneNodes[i].vertexData[j].vertex[1]*sceneNodes[i].vertexData[j].vertex[1])
+                       +(sceneNodes[i].vertexData[j].vertex[2]*sceneNodes[i].vertexData[j].vertex[2]));
+               if(r2 > r)
+               {
+                   r = r2;
+               }
+           }
+
+           sceneNodes[i].x = xsum / (double)sceneNodes[i].vertexDataSize;
+           sceneNodes[i].y = ysum / (double)sceneNodes[i].vertexDataSize;
+           sceneNodes[i].z = zsum / (double)sceneNodes[i].vertexDataSize;
+
+           if(r == 0)
+           {
+               std::cerr << "Warning, bounding sphere radius = 0 for " << sceneNodes[i].name << std::endl;
+           }
         sceneNodes[i].boundingSphere = r;
     }
-
-
-    // TODO: add textures to db
-
-    //std::cout << "num scene nodes: " << sceneNodes.size() << std::endl;
-    //std::cout << "num vertices: " << vertexData.size() << std::endl;
-    //std::cout << "num indices: " << indices.size() << std::endl;
-
 }
 
 string intToStr(int i)
@@ -362,7 +379,7 @@ void SceneBuilder::saveToDB(const char* dbFile)
             "DROP TABLE IF EXISTS material;"\
             "DROP TABLE IF EXISTS texture;"\
             "CREATE TABLE vertex(id INTEGER PRIMARY KEY AUTOINCREMENT, px INTEGER NOT NULL, py INTEGER NOT NULL, pz INTEGER NOT NULL, nx INTEGER NOT NULL, ny INTEGER NOT NULL, nz INTEGER NOT NULL, tu INTEGER NOT NULL, tv INTEGER NOT NULL);"\
-            "CREATE TABLE scene_node(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, material_id INTEGER, start_position INTEGER NOT NULL, end_position INTEGER NOT NULL);"\
+            "CREATE TABLE scene_node(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, material_id INTEGER, start_position INTEGER NOT NULL, end_position INTEGER NOT NULL, boundingSphere, x INTEGER NOT NULL, y INTEGER NOT NULL, z INTEGER NOT NULL);"\
             "CREATE TABLE material(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, normal_texname TEXT, dissolve INTEGER, diffuse_r INTEGER, diffuse_g INTEGER, diffuse_b INTEGER, transmittance_r INTEGER, transmittance_g INTEGER, transmittance_b INTEGER, emission_r INTEGER, emission_g INTEGER, emission_b INTEGER, shininess INTEGER, specular_texname TEXT, specular_r INTEGER, specular_g INTEGER, specular_b INTEGER, diffuse_texname TEXT, ambient_r INTEGER, ambient_g INTEGER, ambient_b INTEGER, ior INTEGER, ambient_texname TEXT, illum INTEGER);" \
             "CREATE TABLE texture(name TEXT PRIMARY KEY NOT NULL, image BLOB NOT NULL);";
 
@@ -409,7 +426,7 @@ void SceneBuilder::saveToDB(const char* dbFile)
 
     for(size_t i=0; i<sceneNodes.size(); i++)
     {
-        string sceneNodeInsertSQL = "INSERT INTO scene_node(name, material_id, start_position, end_position) VALUES (";
+        string sceneNodeInsertSQL = "INSERT INTO scene_node(name, material_id, start_position, end_position, boundingSphere, x, y, z) VALUES (";
         sceneNodeInsertSQL += "'" + sceneNodes.at(i).name + "'";
         sceneNodeInsertSQL += ",";
         sceneNodeInsertSQL += intToStr(getMaterialId(sceneNodes.at(i).material));
@@ -417,6 +434,14 @@ void SceneBuilder::saveToDB(const char* dbFile)
         sceneNodeInsertSQL += intToStr(sceneNodes.at(i).startPosition);
         sceneNodeInsertSQL += ",";
         sceneNodeInsertSQL += intToStr(sceneNodes.at(i).endPosition);
+        sceneNodeInsertSQL += ",";
+        sceneNodeInsertSQL += intToStr(sceneNodes.at(i).boundingSphere);
+        sceneNodeInsertSQL += ",";
+        sceneNodeInsertSQL += intToStr(sceneNodes.at(i).x);
+        sceneNodeInsertSQL += ",";
+        sceneNodeInsertSQL += intToStr(sceneNodes.at(i).y);
+        sceneNodeInsertSQL += ",";
+        sceneNodeInsertSQL += intToStr(sceneNodes.at(i).z);
         sceneNodeInsertSQL += ");";
         rc = sqlite3_exec(db, sceneNodeInsertSQL.c_str(), 0, 0, &error_msg);
         if (rc != SQLITE_OK)

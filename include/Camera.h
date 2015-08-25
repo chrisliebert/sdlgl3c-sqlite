@@ -18,12 +18,12 @@ typedef struct Camera
     float speed;
 } Camera;
 
-void Camera_aim(Camera* camera, float x, float y);
-void Camera_init(Camera* camera);
-void Camera_moveBackward(Camera* camera, float amount);
-void Camera_moveForward(Camera* camera, float amount);
-void Camera_moveLeft(Camera* camera, float amount);
-void Camera_moveRight(Camera* camera, float amount);
-void Camera_update(Camera* camera);
+EXPORT void Camera_aim(Camera* camera, float x, float y);
+EXPORT void Camera_init(Camera* camera);
+EXPORT void Camera_moveBackward(Camera* camera, float amount);
+EXPORT void Camera_moveForward(Camera* camera, float amount);
+EXPORT void Camera_moveLeft(Camera* camera, float amount);
+EXPORT void Camera_moveRight(Camera* camera, float amount);
+EXPORT void Camera_update(Camera* camera);
 
 #endif

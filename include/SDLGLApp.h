@@ -22,8 +22,11 @@ typedef struct SDLGLApp
     double lastTime;
 } SDLGLApp;
 
-void SDLGLApp_init(SDLGLApp*, const char*);
-void SDLGLApp_start(SDLGLApp*);
-void SDLGLApp_destroy(SDLGLApp*);
+EXPORT void SDLGLApp_init(SDLGLApp*, const char*);
+EXPORT void SDLGLApp_start(SDLGLApp*);
+EXPORT void SDLGLApp_destroy(SDLGLApp*);
+
+EXPORT void infoMsg(const char*);
+EXPORT void errorMsg(const char*);
 
 #endif /* _SDLGLAPP_H_ */
