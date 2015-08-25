@@ -613,7 +613,7 @@ end
 
 -- Load SDLGLApp from C
 
-local ge = nil
+ge = nil
 if isWindows() then
 	ge = ffi.load("./libGraphicsEngine.dll")
 else
@@ -622,14 +622,36 @@ end
 
 print("loaded libGraphicsEngine with ffi")
 
-local app = ffi.new("SDLGLApp")
 if arg[1] == nil then
   print("You must supply a database")
   os.exit(1)
 end
+
 print("Loading ", arg[1])
-ge.SDLGLApp_init(app, arg[1])
-ge.SDLGLApp_start(app);
-ge.SDLGLApp_destroy(app);
+
+SDLGL3App = {}
+SDLGL3App.__index = SDLGL3App
+
+function SDLGL3App.create(dbFileName)
+	local app = {}
+	setmetatable(app, SDLGL3App)
+	app.cStruct = ffi.new("SDLGLApp[1]")
+	ge.SDLGLApp_init(app.cStruct, dbFileName)
+	return app
+end
+
+function SDLGL3App.start(self)
+
+	ge.SDLGLApp_start(self.cStruct)
+end
+
+function SDLGL3App.destroy(self)
+	ge.SDLGLApp_destroy(self.cStruct)
+end
+
+local a = SDLGL3App.create(arg[1])
+a:start()
+a:destroy()
+
 os.exit(0)
 
