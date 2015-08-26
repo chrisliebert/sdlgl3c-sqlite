@@ -1,4 +1,3 @@
-#!/usr/bin/env luajit
 local ffi = require("ffi")
 
 ffi.cdef[[
@@ -612,7 +611,6 @@ function isUnix()
 end
 
 -- Load SDLGLApp from C
-
 ge = nil
 if isWindows() then
 	ge = ffi.load("./libGraphicsEngine.dll")
@@ -620,14 +618,10 @@ else
 	ge = ffi.load("./libGraphicsEngine.so")
 end
 
-print("loaded libGraphicsEngine with ffi")
-
 if arg[1] == nil then
   print("You must supply a database")
   os.exit(1)
 end
-
-print("Loading ", arg[1])
 
 SDLGL3App = {}
 SDLGL3App.__index = SDLGL3App
@@ -641,17 +635,9 @@ function SDLGL3App.create(dbFileName)
 end
 
 function SDLGL3App.start(self)
-
 	ge.SDLGLApp_start(self.cStruct)
 end
 
 function SDLGL3App.destroy(self)
 	ge.SDLGLApp_destroy(self.cStruct)
 end
-
-local a = SDLGL3App.create(arg[1])
-a:start()
-a:destroy()
-
-os.exit(0)
-

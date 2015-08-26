@@ -1,3 +1,5 @@
+#include <SDL_thread.h>
+
 #include "SDLGLApp.h"
 
 void infoMsg(const char* msg)
@@ -22,6 +24,9 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName)
     app->deltaTime = 0;
     app->window = 0;
     app->lastTime = SDL_GetTicks();
+
+    // update thread callback (called every frame)
+    app->updateCB = NULL;
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
@@ -163,13 +168,39 @@ void SDLGLApp_keyUp(SDLGLApp* app, SDL_Keycode key)
 
 }
 
+
+static int updateThreadCB(void *ptr)
+{
+    SDLGLApp* app = (SDLGLApp*) ptr;
+    if(app->updateCB == NULL) return 0;
+
+    void (*update)(void);
+    update = app->updateCB;
+
+    while(app->runLevel > 0)
+    {
+        SDL_Delay((int)(1));
+        update();
+    }
+
+    return 0;
+}
+
 void SDLGLApp_start(SDLGLApp* app)
 {
     GLint viewport[4];
     double width, height;
     double xpos, ypos;
     int x, y;
-	double currentTime = SDL_GetTicks();
+    double currentTime = SDL_GetTicks();
+    SDL_Thread* updateThread = NULL;
+    int updateThreadReturnValue;
+
+    if(updateThreadCB != NULL)
+    {
+        updateThread = SDL_CreateThread(updateThreadCB, "UpdateThread", (void*)app);
+        assert(updateThread);
+    }
 
     while (app->runLevel > 0)
     {
@@ -244,4 +275,10 @@ void SDLGLApp_start(SDLGLApp* app)
         Renderer_render(&app->renderer, &app->camera);
         SDL_GL_SwapWindow(app->window);
     }
+
+    if(updateThread != NULL)
+    {
+        SDL_WaitThread(updateThread, &updateThreadReturnValue);
+    }
+
 }

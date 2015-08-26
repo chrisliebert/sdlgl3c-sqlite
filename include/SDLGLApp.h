@@ -4,7 +4,7 @@
 #include "Common.h"
 #include "Renderer.h"
 
-typedef struct SDLGLApp
+EXPORT typedef struct SDLGLApp
 {
     SDL_Window* window;
     Renderer renderer;
@@ -20,6 +20,9 @@ typedef struct SDLGLApp
     float deltaTime;
     int runLevel;
     double lastTime;
+
+    /* Thread callback */
+    void (*updateCB)(void);
 } SDLGLApp;
 
 EXPORT void SDLGLApp_init(SDLGLApp*, const char*);
