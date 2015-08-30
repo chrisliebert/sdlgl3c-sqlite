@@ -21,6 +21,16 @@ void Matrix_perspective(Matrix* result, float fovy, float aspect, float nearZ, f
 void Matrix_ortho(Matrix* result, float left, float right, float bottom, float top, float nearZ, float farZ);
 void Matrix_multiply(Matrix* result, Matrix* srcA, Matrix* srcB);
 
+typedef struct
+{
+    float x, y, z;
+} Point;
+
+typedef struct Frustum
+{
+    float f[6][4];
+} Frustum;
+
 typedef struct Camera
 {
     Matrix modelViewMatrix;
@@ -32,6 +42,7 @@ typedef struct Camera
     float horizontalAngle;
     float verticalAngle;
     float speed;
+    Frustum frustum;
 } Camera;
 
 void Camera_aim(Camera* camera, float x, float y);
@@ -128,7 +139,7 @@ typedef struct Renderer
     VertexShader vertShader;
     FragmentShader fragShader;
     char* dbFileName;
-    bool useFixedFunctionLegacyMode; /* Disable shaders and used OpenGL 1 immediate mode */
+    bool useFixedFunctionLegacyMode;
 } Renderer;
 
 void Renderer_bufferToGPU(Renderer*);
@@ -580,7 +591,8 @@ typedef struct SDL_DollarGestureEvent
 
 typedef struct SDLGLApp
 {
-    // SDL_Window* window;
+    //SDL_Window* window;
+    int* window;
     Renderer renderer;
     Camera camera;
     //SDL_GLContext glContext;
@@ -597,7 +609,7 @@ typedef struct SDLGLApp
 } SDLGLApp;
 
 void SDLGLApp_init(SDLGLApp*, const char*);
-void SDLGLApp_start(SDLGLApp*);
+void SDLGLApp_update(SDLGLApp*);
 void SDLGLApp_destroy(SDLGLApp*);
 ]]
 
@@ -634,8 +646,8 @@ function SDLGL3App.create(dbFileName)
 	return app
 end
 
-function SDLGL3App.start(self)
-	ge.SDLGLApp_start(self.cStruct)
+function SDLGL3App.update(self)
+	ge.SDLGLApp_update(self.cStruct)
 end
 
 function SDLGL3App.destroy(self)

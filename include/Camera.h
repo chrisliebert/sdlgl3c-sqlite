@@ -2,6 +2,7 @@
 #define _CAMERA_H_
 
 #include "Common.h"
+#include "Frustum.h"
 #include "Matrix.h"
 #include "Vec3.h"
 
@@ -16,6 +17,7 @@ typedef struct Camera
     float horizontalAngle;
     float verticalAngle;
     float speed;
+    Frustum frustum;
 } Camera;
 
 EXPORT void Camera_aim(Camera* camera, float x, float y);

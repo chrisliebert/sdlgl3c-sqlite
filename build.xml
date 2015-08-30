@@ -1,0 +1,24 @@
+<project default="jar">
+
+    <target name="clean">
+        <delete dir="build"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="build/classes"/>
+        <javac srcdir="." destdir="build/classes"/>
+    </target>
+
+    <target name="jar" depends="compile">
+        <jar destfile="sdlgl3j.jar" basedir="build/classes">
+            <manifest>
+                <attribute name="Main-Class" value="sdlgl3c"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="jar">
+        <java jar="sdlgl3j.jar" fork="true"/>
+    </target>
+
+</project>

@@ -46,7 +46,8 @@ typedef struct
     GLuint diffuseTextureId;
     GLuint normalTextureId;
     GLuint specularTextureId;
-    GLfloat boundingSphere;
+    float boundingSphere;
+    float x, y, z;
 } SceneNode;
 
 typedef struct Vertex

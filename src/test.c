@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     SDLGLApp_init(&app, "portland.db");
     Log("Scene loaded\n");
     app.runLevel = -1;
-    SDLGLApp_start(&app);
+    SDLGLApp_update(&app);
     Log("Scene rendered once\nRunning assertions\n");
     runTests(&app);
     SDLGLApp_destroy(&app);

@@ -14,6 +14,7 @@ typedef struct Matrix
 } Matrix;
 
 EXPORT float* Matrix_getOneDimensionalArray(Matrix*);
+EXPORT bool Matrix_inverse(Matrix* result, Matrix* source);
 EXPORT void Matrix_scale(Matrix* result, float sx, float sy, float sz);
 EXPORT void Matrix_translate(Matrix* result, float tx, float ty, float tz);
 EXPORT void Matrix_rotate(Matrix* result, float angle, float x, float y, float z);

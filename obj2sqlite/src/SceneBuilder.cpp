@@ -300,31 +300,31 @@ void SceneBuilder::buildScene()
     double xsum, ysum, zsum = 0.0;
     for(size_t i=0; i<sceneNodes.size(); i++)
     {
-           float r = 0.f;
-           for(size_t j=0; j<sceneNodes[i].vertexDataSize; j++)
-           {
-               xsum += sceneNodes[i].vertexData[j].vertex[0];
-               ysum += sceneNodes[i].vertexData[j].vertex[1];
-               zsum += sceneNodes[i].vertexData[j].vertex[2];
+        float r = 0.f;
+        for(size_t j=0; j<sceneNodes[i].vertexDataSize; j++)
+        {
+            xsum += sceneNodes[i].vertexData[j].vertex[0];
+            ysum += sceneNodes[i].vertexData[j].vertex[1];
+            zsum += sceneNodes[i].vertexData[j].vertex[2];
 
 
-               int r2 = sqrt((sceneNodes[i].vertexData[j].vertex[0]*sceneNodes[i].vertexData[j].vertex[0])
-                       +(sceneNodes[i].vertexData[j].vertex[1]*sceneNodes[i].vertexData[j].vertex[1])
-                       +(sceneNodes[i].vertexData[j].vertex[2]*sceneNodes[i].vertexData[j].vertex[2]));
-               if(r2 > r)
-               {
-                   r = r2;
-               }
-           }
+            int r2 = sqrt((sceneNodes[i].vertexData[j].vertex[0]*sceneNodes[i].vertexData[j].vertex[0])
+                    +(sceneNodes[i].vertexData[j].vertex[1]*sceneNodes[i].vertexData[j].vertex[1])
+                    +(sceneNodes[i].vertexData[j].vertex[2]*sceneNodes[i].vertexData[j].vertex[2]));
+            if(r2 > r)
+            {
+                r = r2;
+            }
+        }
 
-           sceneNodes[i].x = xsum / (double)sceneNodes[i].vertexDataSize;
-           sceneNodes[i].y = ysum / (double)sceneNodes[i].vertexDataSize;
-           sceneNodes[i].z = zsum / (double)sceneNodes[i].vertexDataSize;
+        sceneNodes[i].x = (float)(xsum / (double)sceneNodes[i].vertexDataSize);
+        sceneNodes[i].y = (float)(ysum / (double)sceneNodes[i].vertexDataSize);
+        sceneNodes[i].z = (float)(zsum / (double)sceneNodes[i].vertexDataSize);
 
-           if(r == 0)
-           {
-               std::cerr << "Warning, bounding sphere radius = 0 for " << sceneNodes[i].name << std::endl;
-           }
+        if(r == 0)
+        {
+            std::cerr << "Warning, bounding sphere radius = 0 for " << sceneNodes[i].name << std::endl;
+        }
         sceneNodes[i].boundingSphere = r;
     }
 }
@@ -337,7 +337,7 @@ string intToStr(int i)
     return s;
 }
 
-string ftostr(float& f)
+string fToStr(float& f)
 {
     int i = 0;
     memcpy(&i, &f, sizeof(int));
@@ -401,21 +401,21 @@ void SceneBuilder::saveToDB(const char* dbFile)
     for(size_t i=0; i<vertexData.size(); i++)
     {
         string vertexInsertSQL = "INSERT INTO vertex(px, py, pz, nx, ny, nz, tu, tv) VALUES (";
-        vertexInsertSQL += ftostr(vertexData.at(i).vertex[0]);
+        vertexInsertSQL += fToStr(vertexData.at(i).vertex[0]);
         vertexInsertSQL += ",";
-        vertexInsertSQL += ftostr(vertexData.at(i).vertex[1]);
+        vertexInsertSQL += fToStr(vertexData.at(i).vertex[1]);
         vertexInsertSQL += ",";
-        vertexInsertSQL += ftostr(vertexData.at(i).vertex[2]);
+        vertexInsertSQL += fToStr(vertexData.at(i).vertex[2]);
         vertexInsertSQL += ",";
-        vertexInsertSQL += ftostr(vertexData.at(i).normal[0]);
+        vertexInsertSQL += fToStr(vertexData.at(i).normal[0]);
         vertexInsertSQL += ",";
-        vertexInsertSQL += ftostr(vertexData.at(i).normal[1]);
+        vertexInsertSQL += fToStr(vertexData.at(i).normal[1]);
         vertexInsertSQL += ",";
-        vertexInsertSQL += ftostr(vertexData.at(i).normal[2]);
+        vertexInsertSQL += fToStr(vertexData.at(i).normal[2]);
         vertexInsertSQL += ",";
-        vertexInsertSQL += ftostr(vertexData.at(i).textureCoordinate[0]);
+        vertexInsertSQL += fToStr(vertexData.at(i).textureCoordinate[0]);
         vertexInsertSQL += ",";
-        vertexInsertSQL += ftostr(vertexData.at(i).textureCoordinate[1]);
+        vertexInsertSQL += fToStr(vertexData.at(i).textureCoordinate[1]);
         vertexInsertSQL += ");";
         rc = sqlite3_exec(db, vertexInsertSQL.c_str(), 0, 0, &error_msg);
         if (rc != SQLITE_OK)
@@ -435,13 +435,13 @@ void SceneBuilder::saveToDB(const char* dbFile)
         sceneNodeInsertSQL += ",";
         sceneNodeInsertSQL += intToStr(sceneNodes.at(i).endPosition);
         sceneNodeInsertSQL += ",";
-        sceneNodeInsertSQL += intToStr(sceneNodes.at(i).boundingSphere);
+        sceneNodeInsertSQL += fToStr(sceneNodes.at(i).boundingSphere);
         sceneNodeInsertSQL += ",";
-        sceneNodeInsertSQL += intToStr(sceneNodes.at(i).x);
+        sceneNodeInsertSQL += fToStr(sceneNodes.at(i).x);
         sceneNodeInsertSQL += ",";
-        sceneNodeInsertSQL += intToStr(sceneNodes.at(i).y);
+        sceneNodeInsertSQL += fToStr(sceneNodes.at(i).y);
         sceneNodeInsertSQL += ",";
-        sceneNodeInsertSQL += intToStr(sceneNodes.at(i).z);
+        sceneNodeInsertSQL += fToStr(sceneNodes.at(i).z);
         sceneNodeInsertSQL += ");";
         rc = sqlite3_exec(db, sceneNodeInsertSQL.c_str(), 0, 0, &error_msg);
         if (rc != SQLITE_OK)
@@ -463,45 +463,45 @@ void SceneBuilder::saveToDB(const char* dbFile)
         materialInsertSQL += ",";
         materialInsertSQL += "'" + string(it->second.normalTexName) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.dissolve) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.dissolve) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.diffuse[0]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.diffuse[0]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.diffuse[1]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.diffuse[1]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.diffuse[2]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.diffuse[2]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.transmittance[0]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.transmittance[0]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.transmittance[1]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.transmittance[1]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.transmittance[2]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.transmittance[2]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.emission[0]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.emission[0]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.emission[1]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.emission[1]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.emission[2]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.emission[2]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.shininess) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.shininess) + "'";
         materialInsertSQL += ",";
         materialInsertSQL += "'" + string(it->second.specularTexName) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.specular[0]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.specular[0]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.specular[1]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.specular[1]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.specular[2]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.specular[2]) + "'";
         materialInsertSQL += ",";
         materialInsertSQL += "'" + string(it->second.diffuseTexName) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.ambient[0]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.ambient[0]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.ambient[1]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.ambient[1]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.ambient[2]) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.ambient[2]) + "'";
         materialInsertSQL += ",";
-        materialInsertSQL += "'" + ftostr(it->second.ior) + "'";
+        materialInsertSQL += "'" + fToStr(it->second.ior) + "'";
         materialInsertSQL += ",";
         materialInsertSQL += "'" + string(it->second.ambientTexName) + "'";
         materialInsertSQL += ",";

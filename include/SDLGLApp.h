@@ -20,13 +20,10 @@ EXPORT typedef struct SDLGLApp
     float deltaTime;
     int runLevel;
     double lastTime;
-
-    /* Thread callback */
-    void (*updateCB)(void);
 } SDLGLApp;
 
 EXPORT void SDLGLApp_init(SDLGLApp*, const char*);
-EXPORT void SDLGLApp_start(SDLGLApp*);
+EXPORT void SDLGLApp_update(SDLGLApp*);
 EXPORT void SDLGLApp_destroy(SDLGLApp*);
 
 EXPORT void infoMsg(const char*);
