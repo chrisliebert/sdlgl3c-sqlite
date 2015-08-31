@@ -149,40 +149,13 @@ void Renderer_buildScene(Renderer*);
 void Renderer_render(Renderer*, Camera*);
 
 
-/** SDL types required (program crashes without these definitions) **/
-
-/**
- * \brief A signed 8-bit integer type.
- */
 typedef int8_t Sint8;
-/**
- * \brief An unsigned 8-bit integer type.
- */
 typedef uint8_t Uint8;
-/**
- * \brief A signed 16-bit integer type.
- */
 typedef int16_t Sint16;
-/**
- * \brief An unsigned 16-bit integer type.
- */
 typedef uint16_t Uint16;
-/**
- * \brief A signed 32-bit integer type.
- */
 typedef int32_t Sint32;
-/**
- * \brief An unsigned 32-bit integer type.
- */
 typedef uint32_t Uint32;
-
-/**
- * \brief A signed 64-bit integer type.
- */
 typedef int64_t Sint64;
-/**
- * \brief An unsigned 64-bit integer type.
- */
 typedef uint64_t Uint64;
 
 typedef enum
@@ -281,18 +254,12 @@ typedef enum
     SDL_LASTEVENT    = 0xFFFF
 } SDL_EventType;
 
-/**
- *  \brief Fields shared by every event
- */
 typedef struct SDL_CommonEvent
 {
     Uint32 type;
     Uint32 timestamp;
 } SDL_CommonEvent;
 
-/**
- *  \brief Window state change event data (event.window.*)
- */
 typedef struct SDL_WindowEvent
 {
     Uint32 type;        /**< ::SDL_WINDOWEVENT */
@@ -318,9 +285,6 @@ typedef struct SDL_Keysym
     Uint32 unused;
 } SDL_Keysym;
 
-/**
- *  \brief Keyboard button event structure (event.key.*)
- */
 typedef struct SDL_KeyboardEvent
 {
     Uint32 type;        /**< ::SDL_KEYDOWN or ::SDL_KEYUP */
@@ -334,10 +298,6 @@ typedef struct SDL_KeyboardEvent
     //int keysym;
 } SDL_KeyboardEvent;
 
-//#define SDL_TEXTEDITINGEVENT_TEXT_SIZE (32)
-/**
- *  \brief Keyboard text editing event structure (event.edit.*)
- */
 typedef struct SDL_TextEditingEvent
 {
     Uint32 type;                                /**< ::SDL_TEXTEDITING */
@@ -348,11 +308,6 @@ typedef struct SDL_TextEditingEvent
     Sint32 length;                              /**< The length of selected editing text */
 } SDL_TextEditingEvent;
 
-
-//#define SDL_TEXTINPUTEVENT_TEXT_SIZE (32)
-/**
- *  \brief Keyboard text input event structure (event.text.*)
- */
 typedef struct SDL_TextInputEvent
 {
     Uint32 type;                              /**< ::SDL_TEXTINPUT */
@@ -361,9 +316,6 @@ typedef struct SDL_TextInputEvent
     char text[32];  /**< The input text */
 } SDL_TextInputEvent;
 
-/**
- *  \brief Mouse motion event structure (event.motion.*)
- */
 typedef struct SDL_MouseMotionEvent
 {
     Uint32 type;        /**< ::SDL_MOUSEMOTION */
@@ -377,9 +329,6 @@ typedef struct SDL_MouseMotionEvent
     Sint32 yrel;        /**< The relative motion in the Y direction */
 } SDL_MouseMotionEvent;
 
-/**
- *  \brief Mouse button event structure (event.button.*)
- */
 typedef struct SDL_MouseButtonEvent
 {
     Uint32 type;        /**< ::SDL_MOUSEBUTTONDOWN or ::SDL_MOUSEBUTTONUP */
@@ -394,9 +343,6 @@ typedef struct SDL_MouseButtonEvent
     Sint32 y;           /**< Y coordinate, relative to window */
 } SDL_MouseButtonEvent;
 
-/**
- *  \brief Mouse wheel event structure (event.wheel.*)
- */
 typedef struct SDL_MouseWheelEvent
 {
     Uint32 type;        /**< ::SDL_MOUSEWHEEL */
@@ -407,9 +353,6 @@ typedef struct SDL_MouseWheelEvent
     Sint32 y;           /**< The amount scrolled vertically, positive away from the user and negative toward the user */
 } SDL_MouseWheelEvent;
 
-/**
- *  \brief Joystick axis motion event structure (event.jaxis.*)
- */
 typedef Sint32 SDL_JoystickID;
  
 typedef struct SDL_JoyAxisEvent
@@ -425,9 +368,6 @@ typedef struct SDL_JoyAxisEvent
     Uint16 padding4;
 } SDL_JoyAxisEvent;
 
-/**
- *  \brief Joystick trackball motion event structure (event.jball.*)
- */
 typedef struct SDL_JoyBallEvent
 {
     Uint32 type;        /**< ::SDL_JOYBALLMOTION */
@@ -441,9 +381,6 @@ typedef struct SDL_JoyBallEvent
     Sint16 yrel;        /**< The relative motion in the Y direction */
 } SDL_JoyBallEvent;
 
-/**
- *  \brief Joystick hat position change event structure (event.jhat.*)
- */
 typedef struct SDL_JoyHatEvent
 {
     Uint32 type;        /**< ::SDL_JOYHATMOTION */
@@ -461,9 +398,6 @@ typedef struct SDL_JoyHatEvent
     Uint8 padding2;
 } SDL_JoyHatEvent;
 
-/**
- *  \brief Joystick button event structure (event.jbutton.*)
- */
 typedef struct SDL_JoyButtonEvent
 {
     Uint32 type;        /**< ::SDL_JOYBUTTONDOWN or ::SDL_JOYBUTTONUP */
@@ -475,9 +409,6 @@ typedef struct SDL_JoyButtonEvent
     Uint8 padding2;
 } SDL_JoyButtonEvent;
 
-/**
- *  \brief Joystick device event structure (event.jdevice.*)
- */
 typedef struct SDL_JoyDeviceEvent
 {
     Uint32 type;        /**< ::SDL_JOYDEVICEADDED or ::SDL_JOYDEVICEREMOVED */
@@ -485,10 +416,6 @@ typedef struct SDL_JoyDeviceEvent
     Sint32 which;       /**< The joystick device index for the ADDED event, instance id for the REMOVED event */
 } SDL_JoyDeviceEvent;
 
-
-/**
- *  \brief Game controller axis motion event structure (event.caxis.*)
- */
 typedef struct SDL_ControllerAxisEvent
 {
     Uint32 type;        /**< ::SDL_CONTROLLERAXISMOTION */
@@ -502,10 +429,6 @@ typedef struct SDL_ControllerAxisEvent
     Uint16 padding4;
 } SDL_ControllerAxisEvent;
 
-
-/**
- *  \brief Game controller button event structure (event.cbutton.*)
- */
 typedef struct SDL_ControllerButtonEvent
 {
     Uint32 type;        /**< ::SDL_CONTROLLERBUTTONDOWN or ::SDL_CONTROLLERBUTTONUP */
@@ -517,10 +440,6 @@ typedef struct SDL_ControllerButtonEvent
     Uint8 padding2;
 } SDL_ControllerButtonEvent;
 
-
-/**
- *  \brief Controller device event structure (event.cdevice.*)
- */
 typedef struct SDL_ControllerDeviceEvent
 {
     Uint32 type;        /**< ::SDL_CONTROLLERDEVICEADDED, ::SDL_CONTROLLERDEVICEREMOVED, or ::SDL_CONTROLLERDEVICEREMAPPED */
@@ -539,9 +458,6 @@ typedef struct SDL_Finger
     float pressure;
 } SDL_Finger;
 
-/**
- *  \brief Touch finger event structure (event.tfinger.*)
- */
 typedef struct SDL_TouchFingerEvent
 {
     Uint32 type;        /**< ::SDL_FINGERMOTION or ::SDL_FINGERDOWN or ::SDL_FINGERUP */
@@ -555,10 +471,6 @@ typedef struct SDL_TouchFingerEvent
     float pressure;     /**< Normalized in the range 0...1 */
 } SDL_TouchFingerEvent;
 
-
-/**
- *  \brief Multiple Finger Gesture Event (event.mgesture.*)
- */
 typedef struct SDL_MultiGestureEvent
 {
     Uint32 type;        /**< ::SDL_MULTIGESTURE */
@@ -574,9 +486,6 @@ typedef struct SDL_MultiGestureEvent
 
 typedef Sint64 SDL_GestureID;
 
-/**
- * \brief Dollar Gesture Event (event.dgesture.*)
- */
 typedef struct SDL_DollarGestureEvent
 {
     Uint32 type;        /**< ::SDL_DOLLARGESTURE */
@@ -589,14 +498,80 @@ typedef struct SDL_DollarGestureEvent
     float y;            /**< Normalized center of gesture */
 } SDL_DollarGestureEvent;
 
+typedef struct SDL_QuitEvent
+{
+    Uint32 type;        /**< ::SDL_QUIT */
+    Uint32 timestamp;
+} SDL_QuitEvent;    
+
+typedef struct SDL_UserEvent
+{
+    Uint32 type;        /**< ::SDL_USEREVENT through ::SDL_LASTEVENT-1 */
+    Uint32 timestamp;
+    Uint32 windowID;    /**< The associated window if any */
+    Sint32 code;        /**< User defined event code */
+    void *data1;        /**< User defined data pointer */
+    void *data2;        /**< User defined data pointer */
+} SDL_UserEvent;
+
+struct SDL_SysWMmsg;
+typedef struct SDL_SysWMmsg SDL_SysWMmsg;
+
+typedef struct SDL_SysWMEvent
+{
+    Uint32 type;        /**< ::SDL_SYSWMEVENT */
+    Uint32 timestamp;
+    SDL_SysWMmsg *msg;  /**< driver dependent data, defined in SDL_syswm.h */
+} SDL_SysWMEvent;
+
+typedef struct SDL_DropEvent
+{
+    Uint32 type;        /**< ::SDL_DROPFILE */
+    Uint32 timestamp;
+    char *file;         /**< The file name, which should be freed with SDL_free() */
+} SDL_DropEvent;
+
+typedef union SDL_Event
+{
+    Uint32 type;                    /**< Event type, shared with all events */
+    SDL_CommonEvent common;         /**< Common event data */
+    SDL_WindowEvent window;         /**< Window event data */
+    SDL_KeyboardEvent key;          /**< Keyboard event data */
+    SDL_TextEditingEvent edit;      /**< Text editing event data */
+    SDL_TextInputEvent text;        /**< Text input event data */
+    SDL_MouseMotionEvent motion;    /**< Mouse motion event data */
+    SDL_MouseButtonEvent button;    /**< Mouse button event data */
+    SDL_MouseWheelEvent wheel;      /**< Mouse wheel event data */
+    SDL_JoyAxisEvent jaxis;         /**< Joystick axis event data */
+    SDL_JoyBallEvent jball;         /**< Joystick ball event data */
+    SDL_JoyHatEvent jhat;           /**< Joystick hat event data */
+    SDL_JoyButtonEvent jbutton;     /**< Joystick button event data */
+    SDL_JoyDeviceEvent jdevice;     /**< Joystick device change event data */
+    SDL_ControllerAxisEvent caxis;      /**< Game Controller axis event data */
+    SDL_ControllerButtonEvent cbutton;  /**< Game Controller button event data */
+    SDL_ControllerDeviceEvent cdevice;  /**< Game Controller device event data */
+    SDL_QuitEvent quit;             /**< Quit request event data */
+    SDL_UserEvent user;             /**< Custom event data */
+    SDL_SysWMEvent syswm;           /**< System dependent window event data */
+    SDL_TouchFingerEvent tfinger;   /**< Touch finger event data */
+    SDL_MultiGestureEvent mgesture; /**< Gesture event data */
+    SDL_DollarGestureEvent dgesture; /**< Gesture event data */
+    SDL_DropEvent drop;             /**< Drag and drop event data */
+
+    Uint8 padding[56];
+} SDL_Event;
+
+typedef struct SDL_Window SDL_Window;
+typedef void *SDL_GLContext;
+
 typedef struct SDLGLApp
 {
-    //SDL_Window* window;
-    int* window;
+    int runLevel;
+    SDL_Window* window;
     Renderer renderer;
     Camera camera;
-    //SDL_GLContext glContext;
-    //SDL_Event event;
+    SDL_GLContext glContext;
+    SDL_Event event;
     float position[3];
     float direction[3];
     float right[3];
@@ -604,7 +579,6 @@ typedef struct SDLGLApp
     float verticalAngle;
     float mouseSpeed;
     float deltaTime;
-    int runLevel;
     double lastTime;
 } SDLGLApp;
 
@@ -623,33 +597,32 @@ function isUnix()
 end
 
 -- Load SDLGLApp from C
-ge = nil
+local ge = nil
 if isWindows() then
 	ge = ffi.load("./libGraphicsEngine.dll")
 else
 	ge = ffi.load("./libGraphicsEngine.so")
 end
 
-if arg[1] == nil then
-  print("You must supply a database")
-  os.exit(1)
-end
+SDLGLApp = {}
+SDLGLApp.__index = SDLGLApp
 
-SDLGL3App = {}
-SDLGL3App.__index = SDLGL3App
-
-function SDLGL3App.create(dbFileName)
+function SDLGLApp.create(self, dbFileName)
 	local app = {}
-	setmetatable(app, SDLGL3App)
-	app.cStruct = ffi.new("SDLGLApp[1]")
-	ge.SDLGLApp_init(app.cStruct, dbFileName)
+	setmetatable(app, SDLGLApp)
+	self.cStruct = ffi.new("SDLGLApp")
+	ge.SDLGLApp_init(self.cStruct, dbFileName)
 	return app
 end
 
-function SDLGL3App.update(self)
+function SDLGLApp.update(self)
 	ge.SDLGLApp_update(self.cStruct)
 end
 
-function SDLGL3App.destroy(self)
+function SDLGLApp.destroy(self)
 	ge.SDLGLApp_destroy(self.cStruct)
+end
+
+function SDLGLApp.getRunLevel(self)
+	return self.cStruct.runLevel
 end

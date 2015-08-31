@@ -47,27 +47,20 @@
 #define MAX_FILENAME_LENGTH 1000
 #define MAX_LOG_LENGTH 1000
 
-//#ifdef WINDOWS
-//#define DLL __declspec(dllexport)
-//#else
-//#endif
-
 #if defined(_MSC_VER)
-    //  Microsoft
+    /*  Microsoft MSVC */
     #define EXPORT __declspec(dllexport)
     #define IMPORT __declspec(dllimport)
 #elif(__MINGW32__)
+	/* MinGW */
     #define EXPORT __declspec(dllexport)
     #define IMPORT __declspec(dllimport)
-#elif defined(_GCC)
-    //  GCC
-    #define EXPORT __declspec(dllexport)
-    #define IMPORT __declspec(dllimport)
-
-    #define EXPORT __attribute__((visibility("default")))
-    #define IMPORT
+#elif defined(__GNUC__) || defined(__GNUG__)
+	/* Unix GCC */
+	#define EXPORT
+	#define IMPORT
 #else
-    //  do nothing and hope for the best?
+    /* Other compiler */
     #define EXPORT
     #define IMPORT
     #pragma warning Unknown dynamic link import/export semantics.

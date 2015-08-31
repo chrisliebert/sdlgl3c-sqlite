@@ -77,13 +77,14 @@ void Renderer_destroy(Renderer* renderer)
     {
         free(renderer->sceneNodes);
     }
-    if (renderer->indices && renderer->numIndices > 0)
-    {
-        /* free(renderer->indices); //Causes a crash */
-    }
     if (renderer->materials && renderer->numMaterials > 0)
     {
         free(renderer->materials);
+    }
+
+    if (renderer->indices && renderer->numIndices > 0)
+    {
+        free(renderer->indices); //Causes a crash on windows? */
     }
 
     free(renderer->dbFileName);
@@ -360,7 +361,9 @@ void Renderer_buildScene(Renderer* renderer)
         sceneNode->x = intToFloat(sqlite3_column_int(stmt, 6));
         sceneNode->y = intToFloat(sqlite3_column_int(stmt, 7));
         sceneNode->z = intToFloat(sqlite3_column_int(stmt, 8));
-
+        sceneNode->diffuseTextureId = NAN;
+        sceneNode->normalTextureId = NAN;
+        sceneNode->specularTextureId = NAN;
         Matrix_loadIdentity(&sceneNode->modelViewMatrix);
         sceneNode->primativeMode = GL_TRIANGLES;
         i++;
@@ -369,7 +372,7 @@ void Renderer_buildScene(Renderer* renderer)
 
     renderer->indices = malloc(sizeof(GLuint) * renderer->numIndices);
     assert(renderer->indices);
-    for (i = 0; i < renderer->numIndices + 1; i++)
+    for (i = 0; i < renderer->numIndices /*+ 1*/; i++)
     {
         renderer->indices[i] = i;
     }
@@ -391,7 +394,7 @@ void Renderer_buildScene(Renderer* renderer)
         }
     }
 
-    sqlite3_free(db);
+    sqlite3_close(db);
 }
 
 void Renderer_bufferToGPU(Renderer* renderer)
@@ -496,6 +499,7 @@ void Renderer_render(Renderer* renderer, Camera* camera)
 {
     int i;
     SceneNode* node;
+    Material* material;
     float lightPos[3] = { 10.f, 135.f, 0.f };
     /* TODO: move uniforms to GPU buffer object */
     GLuint programId = renderer->gpuProgram;
@@ -533,30 +537,37 @@ void Renderer_render(Renderer* renderer, Camera* camera)
     for (i = 0; i < renderer->numSceneNodes; i++)
     {
         node = &renderer->sceneNodes[i];
+        assert(node->materialId <= renderer->numMaterials && node->materialId > 0);
+        material = &renderer->materials[node->materialId - 1];
         /* Only draw node if it is in the camera frustum */
         //if(Frustum_spherePartiallyInFrustum(&camera->frustum, node->x, node->y, node->z, 1000.f /*node->boundingSphere*/) > 0)
         {
-            glBindTexture(GL_TEXTURE_2D, renderer->sceneNodes[i].diffuseTextureId);
+        	if(node->diffuseTextureId != NAN) {
+        		glBindTexture(GL_TEXTURE_2D, node->diffuseTextureId);
+        	}
+
             glUseProgram(renderer->gpuProgram);
 
             glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, &camera->projectionMatrix.m[0][0]);
             glUniformMatrix4fv(viewMatrixId, 1, GL_FALSE, &camera->modelViewMatrix.m[0][0]);
             glUniform3f(lightID, lightPos[0], lightPos[1], lightPos[2]);
-            glUniform3f(ambientLocation, renderer->materials[renderer->sceneNodes[i].materialId].ambient[0],
-                    renderer->materials[renderer->sceneNodes[i].materialId].ambient[1],
-                    renderer->materials[renderer->sceneNodes[i].materialId].ambient[2]);
-            glUniform3f(diffuseLocation, renderer->materials[renderer->sceneNodes[i].materialId].diffuse[0],
-                    renderer->materials[renderer->sceneNodes[i].materialId].diffuse[1],
-                    renderer->materials[renderer->sceneNodes[i].materialId].diffuse[2]);
-            glUniform3f(specularLocation, renderer->materials[renderer->sceneNodes[i].materialId].specular[0],
-                    renderer->materials[renderer->sceneNodes[i].materialId].specular[1],
-                    renderer->materials[renderer->sceneNodes[i].materialId].specular[2]);
-            glUniform1i(
-                    glGetUniformLocation(renderer->gpuProgram, "myTextureSampler"), 0);
+            glUniform3f(ambientLocation, material->ambient[0],
+            		material->ambient[1],
+					material->ambient[2]);
+            glUniform3f(diffuseLocation, material->diffuse[0],
+                    material->diffuse[1],
+					material->diffuse[2]);
+            glUniform3f(specularLocation, material->specular[0],
+            		material->specular[1],
+					material->specular[2]);
+            if(node->diffuseTextureId != NAN) {
+				glUniform1i(
+						glGetUniformLocation(renderer->gpuProgram, "myTextureSampler"), 0);
+            }
             checkForGLError();
-            glDrawRangeElementsBaseVertex(renderer->sceneNodes[i].primativeMode, renderer->sceneNodes[i].startPosition,
-                    renderer->sceneNodes[i].endPosition, (renderer->sceneNodes[i].endPosition - renderer->sceneNodes[i].startPosition),
-                    GL_UNSIGNED_INT, (void*) (0), renderer->sceneNodes[i].startPosition);
+            glDrawRangeElementsBaseVertex(node->primativeMode, node->startPosition,
+            		node->endPosition, (node->endPosition - node->startPosition),
+                    GL_UNSIGNED_INT, (void*) (0), node->startPosition);
         }
 
     }

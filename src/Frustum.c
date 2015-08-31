@@ -116,6 +116,9 @@ void Frustum_extractFrustum(Frustum* frustum, Matrix* modelViewMatrix, Matrix* p
     frustum->f[5][1] /= t;
     frustum->f[5][2] /= t;
     frustum->f[5][3] /= t;
+
+    free(modl);
+    free(proj);
 }
 
 bool Frustum_pointInFrustum(Frustum* frustum, float x, float y, float z)

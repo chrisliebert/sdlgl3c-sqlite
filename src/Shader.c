@@ -116,12 +116,9 @@ char* readFile(const char* filename)
 
 void Shader_load(Shader* shader, const char* filePath)
 {
-    char* filePathTmp = malloc(sizeof(char) * strlen(filePath));
     char* shaderSrcTmp = readFile(filePath);
-    assert(filePathTmp);
-    filePathTmp[0] = '\0';
-    strcpy(filePathTmp, filePath);
-    shader->filePath = &filePathTmp[0];
+    assert(shaderSrcTmp);
+    shader->filePath = &filePath[0];
     shader->shaderSrc = &shaderSrcTmp[0];
 }
 

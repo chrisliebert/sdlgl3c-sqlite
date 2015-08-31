@@ -6,6 +6,7 @@
 
 EXPORT typedef struct SDLGLApp
 {
+    int runLevel;
     SDL_Window* window;
     Renderer renderer;
     Camera camera;
@@ -18,7 +19,6 @@ EXPORT typedef struct SDLGLApp
     float verticalAngle;
     float mouseSpeed;
     float deltaTime;
-    int runLevel;
     double lastTime;
 } SDLGLApp;
 

@@ -45,7 +45,7 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName) {
 		flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN; /* | SDL_WINDOW_FULLSCREEN; */
 		app->window = SDL_CreateWindow("", 300, 100, 800, 600, flags);
 		if (app->window == NULL) {
-			fprintf(stderr, "Unable to create window: %s\n", SDL_GetError());
+			Log_errorf("Unable to create window: %s\n", SDL_GetError());
 			errorMsg("Unable to create window");
 			app->runLevel = 0;
 			return;
@@ -157,26 +157,27 @@ void SDLGLApp_update(SDLGLApp* app) {
 	int x, y;
 	double currentTime = SDL_GetTicks();
 
+	if (app->runLevel < 1) return;
+
 	//TODO:move to resize
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
 	width = (double) viewport[2];
 	height = (double) viewport[3];
-	//if (app->runLevel < 1) return;
 
-	const Uint8 *keys = SDL_GetKeyboardState(NULL);
-	SDL_PollEvent(&app->event);
-
-	if (app->event.type == SDL_QUIT) {
-		app->runLevel = 0;
-		return;
-	} else if (app->event.type == SDL_KEYDOWN) {
-		SDLGLApp_keyDown(app, app->event.key.keysym.sym);
-		if (app->runLevel < 1) {
+	const Uint8* keys = SDL_GetKeyboardState(NULL); /* todo:move to app and free on destroy */
+	if(SDL_PollEvent(&app->event) == 1) {
+		if (app->event.type == SDL_QUIT) {
+			app->runLevel = 0;
 			return;
+		} else if (app->event.type == SDL_KEYDOWN) {
+			SDLGLApp_keyDown(app, app->event.key.keysym.sym);
+			if (app->runLevel < 1) {
+				return;
+			}
+		} else if (app->event.type == SDL_KEYUP) {
+			SDLGLApp_keyUp(app, app->event.key.keysym.sym);
 		}
-	} else if (app->event.type == SDL_KEYUP) {
-		SDLGLApp_keyUp(app, app->event.key.keysym.sym);
 	}
 
 	if (keys[SDL_SCANCODE_W]) {
@@ -209,6 +210,8 @@ void SDLGLApp_update(SDLGLApp* app) {
 	ypos = (double) y;
 
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
+
+
 	SDL_WarpMouseInWindow(app->window, (int) (width / 2.0),
 			(int) (height / 2.0));
 	SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);

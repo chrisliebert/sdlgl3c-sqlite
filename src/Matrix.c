@@ -304,7 +304,6 @@ void Matrix_ortho(Matrix* result, float left, float right, float bottom, float t
     Matrix_multiply(result, &ortho, result);
 }
 
-/* Todo: apply optimal 2^38 n algorithm */
 void Matrix_multiply(Matrix* result, Matrix* srcA, Matrix* srcB)
 {
     Matrix tmp;
