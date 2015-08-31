@@ -1,154 +1,12 @@
 local ffi = require("ffi")
 
 ffi.cdef[[
+/***************************** OpenGL delcarations *******************************/
 typedef unsigned GLuint;
 typedef int GLenum;
 typedef float GLfloat;
 
-typedef struct Matrix
-{
-    float m[4][4];
-} Matrix;
-
-float* Matrix_getOneDimensionalArray(Matrix*);
-void Matrix_scale(Matrix* result, float sx, float sy, float sz);
-void Matrix_translate(Matrix* result, float tx, float ty, float tz);
-void Matrix_rotate(Matrix* result, float angle, float x, float y, float z);
-void Matrix_loadIdentity(Matrix* result);
-void Matrix_lookAt(Matrix* result, float posX, float posY, float posZ, float lookAtX, float lookAtY, float lookAtZ, float upX, float upY, float upZ);
-void Matrix_frustum(Matrix* result, float left, float right, float bottom, float top, float nearZ, float farZ);
-void Matrix_perspective(Matrix* result, float fovy, float aspect, float nearZ, float farZ);
-void Matrix_ortho(Matrix* result, float left, float right, float bottom, float top, float nearZ, float farZ);
-void Matrix_multiply(Matrix* result, Matrix* srcA, Matrix* srcB);
-
-typedef struct
-{
-    float x, y, z;
-} Point;
-
-typedef struct Frustum
-{
-    float f[6][4];
-} Frustum;
-
-typedef struct Camera
-{
-    Matrix modelViewMatrix;
-    Matrix projectionMatrix;
-    float position[3];
-    float direction[3];
-    float right[3];
-    float up[3];
-    float horizontalAngle;
-    float verticalAngle;
-    float speed;
-    Frustum frustum;
-} Camera;
-
-void Camera_aim(Camera* camera, float x, float y);
-void Camera_init(Camera* camera);
-void Camera_moveBackward(Camera* camera, float amount);
-void Camera_moveForward(Camera* camera, float amount);
-void Camera_moveLeft(Camera* camera, float amount);
-void Camera_moveRight(Camera* camera, float amount);
-void Camera_update(Camera* camera);
-
-typedef struct
-{
-    char name[64];
-    float ambient[3];
-    float diffuse[3];
-    float specular[3];
-    float transmittance[3];
-    float emission[3];
-    float shininess;
-    float ior; /* index of refraction */
-    float dissolve; /* 1 == opaque; 0 == fully transparent */
-    /* illumination model (see http://www.fileformat.info/format/material/) */
-    int illum;
-    /* Texture file names */
-    char ambientTextureName[64];
-    char diffuseTextureName[64];
-    char specularTextureName[64];
-    char normalTextureName[64];
-} Material;
-
-typedef struct
-{
-    char name[64];
-    int materialId;
-    Matrix modelViewMatrix;
-    GLuint startPosition;
-    GLuint endPosition;
-    GLenum primativeMode;
-    GLuint ambientTextureId;
-    GLuint diffuseTextureId;
-    GLuint normalTextureId;
-    GLuint specularTextureId;
-    GLfloat boundingSphere;
-} SceneNode;
-
-typedef struct Vertex
-{
-    GLfloat vertex[3];
-    GLfloat normal[3];
-    GLfloat texcoord[2];
-} Vertex;
-
-typedef struct Shader
-{
-    GLuint id;
-    const char* filePath;
-    const char* shaderSrc;
-} Shader;
-
-typedef struct FragmentShader
-{
-    GLuint id;
-    const char* filePath;
-    const char* shaderSrc;
-} FragmentShader;
-
-typedef struct VertexShader
-{
-    GLuint id;
-    const char* filePath;
-    const char* shaderSrc;
-} VertexShader;
-
-GLuint Shader_getId(Shader*);
-
-void FragmentShader_init(FragmentShader*, const char*);
-void FragmentShader_destroy(FragmentShader*);
-
-void VertexShader_init(VertexShader*, const char*);
-void VertexShader_destroy(VertexShader*);
-
-typedef struct Renderer
-{
-    GLuint vao, vbo, ibo;
-    GLuint gpuProgram;
-    Vertex* vertexData;
-    int vertexDataSize;
-    SceneNode* sceneNodes;
-    int numSceneNodes;
-    GLuint* indices;
-    int numIndices;
-    int numMaterials;
-    Material* materials;
-    VertexShader vertShader;
-    FragmentShader fragShader;
-    char* dbFileName;
-    bool useFixedFunctionLegacyMode;
-} Renderer;
-
-void Renderer_bufferToGPU(Renderer*);
-void Renderer_init(Renderer*, const char*);
-void Renderer_destroy(Renderer*);
-void Renderer_buildScene(Renderer*);
-void Renderer_render(Renderer*, Camera*);
-
-
+/******************************* SDL delcarations ********************************/
 typedef int8_t Sint8;
 typedef uint8_t Uint8;
 typedef int16_t Sint16;
@@ -160,54 +18,29 @@ typedef uint64_t Uint64;
 
 typedef enum
 {
-    SDL_FIRSTEVENT     = 0,     /**< Unused (do not remove) */
+    SDL_FIRSTEVENT     = 0,
 
-    /* Application events */
-    SDL_QUIT           = 0x100, /**< User-requested quit */
+    SDL_QUIT           = 0x100,
+    SDL_APP_TERMINATING,
+    SDL_APP_LOWMEMORY,
+    SDL_APP_WILLENTERBACKGROUND,
+    SDL_APP_DIDENTERBACKGROUND,
+    SDL_APP_WILLENTERFOREGROUND,
+    SDL_APP_DIDENTERFOREGROUND,
 
-    /* These application events have special meaning on iOS, see README-ios.txt for details */
-    SDL_APP_TERMINATING,        /**< The application is being terminated by the OS
-                                     Called on iOS in applicationWillTerminate()
-                                     Called on Android in onDestroy()
-                                */
-    SDL_APP_LOWMEMORY,          /**< The application is low on memory, free memory if possible.
-                                     Called on iOS in applicationDidReceiveMemoryWarning()
-                                     Called on Android in onLowMemory()
-                                */
-    SDL_APP_WILLENTERBACKGROUND, /**< The application is about to enter the background
-                                     Called on iOS in applicationWillResignActive()
-                                     Called on Android in onPause()
-                                */
-    SDL_APP_DIDENTERBACKGROUND, /**< The application did enter the background and may not get CPU for some time
-                                     Called on iOS in applicationDidEnterBackground()
-                                     Called on Android in onPause()
-                                */
-    SDL_APP_WILLENTERFOREGROUND, /**< The application is about to enter the foreground
-                                     Called on iOS in applicationWillEnterForeground()
-                                     Called on Android in onResume()
-                                */
-    SDL_APP_DIDENTERFOREGROUND, /**< The application is now interactive
-                                     Called on iOS in applicationDidBecomeActive()
-                                     Called on Android in onResume()
-                                */
-
-    /* Window events */
     SDL_WINDOWEVENT    = 0x200, /**< Window state change */
     SDL_SYSWMEVENT,             /**< System specific event */
-
-    /* Keyboard events */
+    
     SDL_KEYDOWN        = 0x300, /**< Key pressed */
     SDL_KEYUP,                  /**< Key released */
     SDL_TEXTEDITING,            /**< Keyboard text editing (composition) */
     SDL_TEXTINPUT,              /**< Keyboard text input */
 
-    /* Mouse events */
     SDL_MOUSEMOTION    = 0x400, /**< Mouse moved */
     SDL_MOUSEBUTTONDOWN,        /**< Mouse button pressed */
     SDL_MOUSEBUTTONUP,          /**< Mouse button released */
     SDL_MOUSEWHEEL,             /**< Mouse wheel motion */
 
-    /* Joystick events */
     SDL_JOYAXISMOTION  = 0x600, /**< Joystick axis motion */
     SDL_JOYBALLMOTION,          /**< Joystick trackball motion */
     SDL_JOYHATMOTION,           /**< Joystick hat position change */
@@ -216,7 +49,6 @@ typedef enum
     SDL_JOYDEVICEADDED,         /**< A new joystick has been inserted into the system */
     SDL_JOYDEVICEREMOVED,       /**< An opened joystick has been removed */
 
-    /* Game controller events */
     SDL_CONTROLLERAXISMOTION  = 0x650, /**< Game controller axis motion */
     SDL_CONTROLLERBUTTONDOWN,          /**< Game controller button pressed */
     SDL_CONTROLLERBUTTONUP,            /**< Game controller button released */
@@ -224,33 +56,17 @@ typedef enum
     SDL_CONTROLLERDEVICEREMOVED,       /**< An opened Game controller has been removed */
     SDL_CONTROLLERDEVICEREMAPPED,      /**< The controller mapping was updated */
 
-    /* Touch events */
     SDL_FINGERDOWN      = 0x700,
     SDL_FINGERUP,
     SDL_FINGERMOTION,
-
-    /* Gesture events */
+    
     SDL_DOLLARGESTURE   = 0x800,
     SDL_DOLLARRECORD,
     SDL_MULTIGESTURE,
-
-    /* Clipboard events */
-    SDL_CLIPBOARDUPDATE = 0x900, /**< The clipboard changed */
-
-    /* Drag and drop events */
-    SDL_DROPFILE        = 0x1000, /**< The system requests a file open */
-
-    /* Render events */
-    SDL_RENDER_TARGETS_RESET = 0x2000, /**< The render targets have been reset */
-
-    /** Events ::SDL_USEREVENT through ::SDL_LASTEVENT are for your use,
-     *  and should be allocated with SDL_RegisterEvents()
-     */
+    SDL_CLIPBOARDUPDATE = 0x900,
+    SDL_DROPFILE        = 0x1000,
+    SDL_RENDER_TARGETS_RESET = 0x2000,
     SDL_USEREVENT    = 0x8000,
-
-    /**
-     *  This last event is only for bounding internal arrays
-     */
     SDL_LASTEVENT    = 0xFFFF
 } SDL_EventType;
 
@@ -557,12 +373,155 @@ typedef union SDL_Event
     SDL_MultiGestureEvent mgesture; /**< Gesture event data */
     SDL_DollarGestureEvent dgesture; /**< Gesture event data */
     SDL_DropEvent drop;             /**< Drag and drop event data */
-
     Uint8 padding[56];
 } SDL_Event;
 
 typedef struct SDL_Window SDL_Window;
 typedef void *SDL_GLContext;
+
+/************************ GraphicsEngine delcarations ***************************/
+typedef struct Matrix
+{
+    float m[4][4];
+} Matrix;
+
+float* Matrix_getOneDimensionalArray(Matrix*);
+void Matrix_scale(Matrix* result, float sx, float sy, float sz);
+void Matrix_translate(Matrix* result, float tx, float ty, float tz);
+void Matrix_rotate(Matrix* result, float angle, float x, float y, float z);
+void Matrix_loadIdentity(Matrix* result);
+void Matrix_lookAt(Matrix* result, float posX, float posY, float posZ, float lookAtX, float lookAtY, float lookAtZ, float upX, float upY, float upZ);
+void Matrix_frustum(Matrix* result, float left, float right, float bottom, float top, float nearZ, float farZ);
+void Matrix_perspective(Matrix* result, float fovy, float aspect, float nearZ, float farZ);
+void Matrix_ortho(Matrix* result, float left, float right, float bottom, float top, float nearZ, float farZ);
+void Matrix_multiply(Matrix* result, Matrix* srcA, Matrix* srcB);
+
+typedef struct
+{
+    float x, y, z;
+} Point;
+
+typedef struct Frustum
+{
+    float f[6][4];
+} Frustum;
+
+typedef struct Camera
+{
+    Matrix modelViewMatrix;
+    Matrix projectionMatrix;
+    float position[3];
+    float direction[3];
+    float right[3];
+    float up[3];
+    float horizontalAngle;
+    float verticalAngle;
+    float speed;
+    Frustum frustum;
+} Camera;
+
+void Camera_aim(Camera* camera, float x, float y);
+void Camera_init(Camera* camera);
+void Camera_moveBackward(Camera* camera, float amount);
+void Camera_moveForward(Camera* camera, float amount);
+void Camera_moveLeft(Camera* camera, float amount);
+void Camera_moveRight(Camera* camera, float amount);
+void Camera_update(Camera* camera);
+
+typedef struct
+{
+    char name[64];
+    float ambient[3];
+    float diffuse[3];
+    float specular[3];
+    float transmittance[3];
+    float emission[3];
+    float shininess;
+    float ior; /* index of refraction */
+    float dissolve; /* 1 == opaque; 0 == fully transparent */
+    /* illumination model (see http://www.fileformat.info/format/material/) */
+    int illum;
+    /* Texture file names */
+    char ambientTextureName[64];
+    char diffuseTextureName[64];
+    char specularTextureName[64];
+    char normalTextureName[64];
+} Material;
+
+typedef struct
+{
+    char name[64];
+    int materialId;
+    Matrix modelViewMatrix;
+    GLuint startPosition;
+    GLuint endPosition;
+    GLenum primativeMode;
+    GLuint ambientTextureId;
+    GLuint diffuseTextureId;
+    GLuint normalTextureId;
+    GLuint specularTextureId;
+    GLfloat boundingSphere;
+} SceneNode;
+
+typedef struct Vertex
+{
+    GLfloat vertex[3];
+    GLfloat normal[3];
+    GLfloat texcoord[2];
+} Vertex;
+
+typedef struct Shader
+{
+    GLuint id;
+    const char* filePath;
+    const char* shaderSrc;
+} Shader;
+
+typedef struct FragmentShader
+{
+    GLuint id;
+    const char* filePath;
+    const char* shaderSrc;
+} FragmentShader;
+
+typedef struct VertexShader
+{
+    GLuint id;
+    const char* filePath;
+    const char* shaderSrc;
+} VertexShader;
+
+GLuint Shader_getId(Shader*);
+
+void FragmentShader_init(FragmentShader*, const char*);
+void FragmentShader_destroy(FragmentShader*);
+
+void VertexShader_init(VertexShader*, const char*);
+void VertexShader_destroy(VertexShader*);
+
+typedef struct Renderer
+{
+    GLuint vao, vbo, ibo;
+    GLuint gpuProgram;
+    Vertex* vertexData;
+    int vertexDataSize;
+    SceneNode* sceneNodes;
+    int numSceneNodes;
+    GLuint* indices;
+    int numIndices;
+    int numMaterials;
+    Material* materials;
+    VertexShader vertShader;
+    FragmentShader fragShader;
+    char* dbFileName;
+    bool useFixedFunctionLegacyMode;
+} Renderer;
+
+void Renderer_bufferToGPU(Renderer*);
+void Renderer_init(Renderer*, const char*);
+void Renderer_destroy(Renderer*);
+void Renderer_buildScene(Renderer*);
+void Renderer_render(Renderer*, Camera*);
 
 typedef struct SDLGLApp
 {
