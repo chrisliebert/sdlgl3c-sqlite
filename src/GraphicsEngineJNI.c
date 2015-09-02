@@ -11,20 +11,8 @@
  */
 JNIEXPORT void JNICALL Java_GraphicsEngineJNI_infoMsg(JNIEnv* env,
 		jobject thisObj, jstring msg) {
-	SDLGLApp a;
 	const char* msgStr = (*env)->GetStringUTFChars(env, msg, 0);
-
-	SDLGLApp_init(&a, "portland.db");
-
 	infoMsg(msgStr);
-
-	while(a.runLevel > 0) {
-		SDLGLApp_update(&a);
-	}
-
-	SDLGLApp_destroy(&a);
-
-	//printf("hello %s\n", msgStr);
 	(*env)->ReleaseStringUTFChars(env, msg, msgStr);
 }
 

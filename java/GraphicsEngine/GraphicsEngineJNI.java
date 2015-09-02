@@ -1,5 +1,3 @@
-//package com.GraphicsEngine;
-
 public class GraphicsEngineJNI {
 	static {	
 		System.load(getSharedLibraryPath());	
