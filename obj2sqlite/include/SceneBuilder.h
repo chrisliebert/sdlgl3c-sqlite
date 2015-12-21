@@ -79,6 +79,7 @@ typedef struct
     unsigned specularTextureId;
     float boundingSphere;
     float x, y, z;
+	float lx, ly, lz; // position of center
 } SceneNode;
 
 

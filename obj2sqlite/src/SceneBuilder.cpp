@@ -293,37 +293,52 @@ void SceneBuilder::buildScene()
         }
     }
 
-
-    // Calculate x, y, and z (position mean) for each object and
-    // Calculate Bounding Sphere radius
-
-    double xsum, ysum, zsum = 0.0;
-    for(size_t i=0; i<sceneNodes.size(); i++)
+    //Calculate Bounding Sphere radius
+    for(int i=0; i<sceneNodes.size(); i++)
     {
+        float lx = 0.f, ly = 0.f, lz = 0.f;
         float r = 0.f;
-        for(size_t j=0; j<sceneNodes[i].vertexDataSize; j++)
+
+        int vertexDataSize = sceneNodes[i].vertexDataSize;
+        //Calculate local origin
+        for(int j=0; j<vertexDataSize; j++)
         {
-            xsum += sceneNodes[i].vertexData[j].vertex[0];
-            ysum += sceneNodes[i].vertexData[j].vertex[1];
-            zsum += sceneNodes[i].vertexData[j].vertex[2];
+            lx += sceneNodes[i].vertexData[j].vertex[0];
+            ly += sceneNodes[i].vertexData[j].vertex[1];
+            lz += sceneNodes[i].vertexData[j].vertex[2];
+        }
 
+        lx /= (float)vertexDataSize;
+        ly /= (float)vertexDataSize;
+        lz /= (float)vertexDataSize;
 
-            int r2 = sqrt((sceneNodes[i].vertexData[j].vertex[0]*sceneNodes[i].vertexData[j].vertex[0])
-                    +(sceneNodes[i].vertexData[j].vertex[1]*sceneNodes[i].vertexData[j].vertex[1])
-                    +(sceneNodes[i].vertexData[j].vertex[2]*sceneNodes[i].vertexData[j].vertex[2]));
+        sceneNodes[i].lx = lx;
+        sceneNodes[i].ly = ly;
+        sceneNodes[i].lz = lz;
+
+        for(int j=0; j<sceneNodes[i].vertexDataSize; j++)
+        {
+            float x = sceneNodes[i].vertexData[j].vertex[0];
+            float y = sceneNodes[i].vertexData[j].vertex[1];
+            float z = sceneNodes[i].vertexData[j].vertex[2];
+
+            double nx = x - lx;
+            double ny = y - ly;
+            double nz = z - lz;
+
+            float r2 = sqrt(nx*nx + ny*ny + nz*nz);
+
             if(r2 > r)
             {
                 r = r2;
             }
+            //std::cerr << "Boundingsphere for " << sceneNodes[i].name << " = " <<  r << std::endl;
+
         }
-
-        sceneNodes[i].x = (float)(xsum / (double)sceneNodes[i].vertexDataSize);
-        sceneNodes[i].y = (float)(ysum / (double)sceneNodes[i].vertexDataSize);
-        sceneNodes[i].z = (float)(zsum / (double)sceneNodes[i].vertexDataSize);
-
         if(r == 0)
         {
             std::cerr << "Warning, bounding sphere radius = 0 for " << sceneNodes[i].name << std::endl;
+            r = 0.1f;
         }
         sceneNodes[i].boundingSphere = r;
     }
@@ -379,7 +394,7 @@ void SceneBuilder::saveToDB(const char* dbFile)
             "DROP TABLE IF EXISTS material;"\
             "DROP TABLE IF EXISTS texture;"\
             "CREATE TABLE vertex(id INTEGER PRIMARY KEY AUTOINCREMENT, px INTEGER NOT NULL, py INTEGER NOT NULL, pz INTEGER NOT NULL, nx INTEGER NOT NULL, ny INTEGER NOT NULL, nz INTEGER NOT NULL, tu INTEGER NOT NULL, tv INTEGER NOT NULL);"\
-            "CREATE TABLE scene_node(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, material_id INTEGER, start_position INTEGER NOT NULL, end_position INTEGER NOT NULL, boundingSphere, x INTEGER NOT NULL, y INTEGER NOT NULL, z INTEGER NOT NULL);"\
+            "CREATE TABLE scene_node(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, material_id INTEGER, start_position INTEGER NOT NULL, end_position INTEGER NOT NULL, boundingSphere, x INTEGER NOT NULL, y INTEGER NOT NULL, z INTEGER NOT NULL, lx INTEGER NOT NULL, ly INTEGER NOT NULL, lz INTEGER NOT NULL);"\
             "CREATE TABLE material(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, normal_texname TEXT, dissolve INTEGER, diffuse_r INTEGER, diffuse_g INTEGER, diffuse_b INTEGER, transmittance_r INTEGER, transmittance_g INTEGER, transmittance_b INTEGER, emission_r INTEGER, emission_g INTEGER, emission_b INTEGER, shininess INTEGER, specular_texname TEXT, specular_r INTEGER, specular_g INTEGER, specular_b INTEGER, diffuse_texname TEXT, ambient_r INTEGER, ambient_g INTEGER, ambient_b INTEGER, ior INTEGER, ambient_texname TEXT, illum INTEGER);" \
             "CREATE TABLE texture(name TEXT PRIMARY KEY NOT NULL, image BLOB NOT NULL);";
 
@@ -426,7 +441,7 @@ void SceneBuilder::saveToDB(const char* dbFile)
 
     for(size_t i=0; i<sceneNodes.size(); i++)
     {
-        string sceneNodeInsertSQL = "INSERT INTO scene_node(name, material_id, start_position, end_position, boundingSphere, x, y, z) VALUES (";
+        string sceneNodeInsertSQL = "INSERT INTO scene_node(name, material_id, start_position, end_position, boundingSphere, x, y, z, lx, ly, lz) VALUES (";
         sceneNodeInsertSQL += "'" + sceneNodes.at(i).name + "'";
         sceneNodeInsertSQL += ",";
         sceneNodeInsertSQL += intToStr(getMaterialId(sceneNodes.at(i).material));
@@ -442,6 +457,12 @@ void SceneBuilder::saveToDB(const char* dbFile)
         sceneNodeInsertSQL += fToStr(sceneNodes.at(i).y);
         sceneNodeInsertSQL += ",";
         sceneNodeInsertSQL += fToStr(sceneNodes.at(i).z);
+        sceneNodeInsertSQL += ",";
+        sceneNodeInsertSQL += fToStr(sceneNodes.at(i).lx);
+        sceneNodeInsertSQL += ",";
+        sceneNodeInsertSQL += fToStr(sceneNodes.at(i).ly);
+        sceneNodeInsertSQL += ",";
+        sceneNodeInsertSQL += fToStr(sceneNodes.at(i).lz);
         sceneNodeInsertSQL += ");";
         rc = sqlite3_exec(db, sceneNodeInsertSQL.c_str(), 0, 0, &error_msg);
         if (rc != SQLITE_OK)
