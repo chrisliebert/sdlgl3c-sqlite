@@ -125,7 +125,7 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName) {
 		glGetIntegerv(GL_VIEWPORT, viewport);
 		glViewport(0, 0, viewport[2], viewport[3]);
 		SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-		SDL_WarpMouseInWindow(app->window, viewport[2] / 2, viewport[3] / 2);
+		SDL_WarpMouseInWindow(app->window, viewport[2] / 2.0, viewport[3] / 2.0);
 		SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
 	}
 }
