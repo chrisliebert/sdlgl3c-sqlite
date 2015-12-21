@@ -48,6 +48,7 @@ typedef struct
     GLuint specularTextureId;
     float boundingSphere;
     float x, y, z;
+    float lx, ly, lz;
 } SceneNode;
 
 typedef struct Vertex
