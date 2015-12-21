@@ -1,8 +1,3 @@
 # sdlgl3c-sqlite
-A 3D OpenGL 3 renderer written in C that loads 3D models from an sqlite3 database.
-This project is based of https://github.com/chrisliebert/sdlgl3-wavefront although the renderer
-is written in C rather than C++. C++ and https://github.com/syoyo/tinyobjloader are used in the obj2sqlite
-sub-project which stores Wavefront data in an SQLite database. The C-renderer has performed faster and more
-efficiently than the C++ version(sdlgl3-wavefront) due to excessive use of std::string::copy (major bottleneck indicated by gprof).
-The use of SQLite makes it easier to store custom attributes in the database
-and load them from the C renderer, increasing the overall robustness.
+A 3D OpenGL 3 renderer written in C with bindings for Java and LuaJIT capable of loading 3D models from an SQLite database.
+This project is derived from https://github.com/chrisliebert/sdlgl3-wavefront. A sub-project called obj2sqlite is a C++ tool for storing 3D information from a Wavefront file in an SQLite .db file. 3D geometry, normal coordinates, texture coordinates, material definitions, properties and textures are stored in the database. Initial processing seen in sdlgl3-wavefront has moved to obj2sqlite such as vertex dereferencing and bounding sphere calculation. The database is optimized for fast loading rather than space efficiancy; floating point data values are interpreted as the binary equivalent integers then stored in the database by obj2sqlite and re-interpreted as floats prior to rendering.
