@@ -361,9 +361,12 @@ void Renderer_buildScene(Renderer* renderer)
         sceneNode->x = intToFloat(sqlite3_column_int(stmt, 6));
         sceneNode->y = intToFloat(sqlite3_column_int(stmt, 7));
         sceneNode->z = intToFloat(sqlite3_column_int(stmt, 8));
-        sceneNode->diffuseTextureId = NAN;
-        sceneNode->normalTextureId = NAN;
-        sceneNode->specularTextureId = NAN;
+        sceneNode->lx = intToFloat(sqlite3_column_int(stmt, 9));
+        sceneNode->ly = intToFloat(sqlite3_column_int(stmt, 10));
+        sceneNode->lz = intToFloat(sqlite3_column_int(stmt, 11));
+        sceneNode->diffuseTextureId = 0xffffffff;
+        sceneNode->normalTextureId = 0xffffffff;
+        sceneNode->specularTextureId = 0xffffffff;
         Matrix_loadIdentity(&sceneNode->modelViewMatrix);
         sceneNode->primativeMode = GL_TRIANGLES;
         i++;
@@ -540,7 +543,7 @@ void Renderer_render(Renderer* renderer, Camera* camera)
         assert(node->materialId <= renderer->numMaterials && node->materialId > 0);
         material = &renderer->materials[node->materialId - 1];
         /* Only draw node if it is in the camera frustum */
-        //if(Frustum_spherePartiallyInFrustum(&camera->frustum, node->x, node->y, node->z, 1000.f /*node->boundingSphere*/) > 0)
+        if(Frustum_spherePartiallyInFrustum(&camera->frustum, node->lx, node->ly, node->lz, node->boundingSphere) > 0)
         {
         	if(node->diffuseTextureId != NAN) {
         		glBindTexture(GL_TEXTURE_2D, node->diffuseTextureId);
