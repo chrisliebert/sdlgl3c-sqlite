@@ -305,8 +305,8 @@ void Renderer_buildScene(Renderer* renderer)
         strcpy(m->normalTextureName, (char*) sqlite3_column_text(stmt, 2));
         m->dissolve = intToFloat(sqlite3_column_int(stmt, 3));
         m->diffuse[0] = intToFloat(sqlite3_column_int(stmt, 4));
-        m->diffuse[0] = intToFloat(sqlite3_column_int(stmt, 5));
-        m->diffuse[0] = intToFloat(sqlite3_column_int(stmt, 6));
+        m->diffuse[1] = intToFloat(sqlite3_column_int(stmt, 5));
+        m->diffuse[2] = intToFloat(sqlite3_column_int(stmt, 6));
 
         m->emission[0] = intToFloat(sqlite3_column_int(stmt, 10));
         m->emission[1] = intToFloat(sqlite3_column_int(stmt, 11));
