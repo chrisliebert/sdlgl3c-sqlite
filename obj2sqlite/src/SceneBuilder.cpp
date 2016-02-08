@@ -150,9 +150,6 @@ void SceneBuilder::addWavefront(const char* fileName, glm::mat4 matrix)
                     sceneNode.diffuseTextureId = 0;
                     sceneNode.modelViewMatrix = matrix;
                     sceneNode.boundingSphere = 0.f;
-                    sceneNode.x = 0.f;
-                    sceneNode.y = 0.f;
-                    sceneNode.z = 0.f;
                     addSceneNode(&sceneNode);
                     mVertexData.clear();
                 }
@@ -394,7 +391,7 @@ void SceneBuilder::saveToDB(const char* dbFile)
             "DROP TABLE IF EXISTS material;"\
             "DROP TABLE IF EXISTS texture;"\
             "CREATE TABLE vertex(id INTEGER PRIMARY KEY AUTOINCREMENT, px INTEGER NOT NULL, py INTEGER NOT NULL, pz INTEGER NOT NULL, nx INTEGER NOT NULL, ny INTEGER NOT NULL, nz INTEGER NOT NULL, tu INTEGER NOT NULL, tv INTEGER NOT NULL);"\
-            "CREATE TABLE scene_node(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, material_id INTEGER, start_position INTEGER NOT NULL, end_position INTEGER NOT NULL, boundingSphere, x INTEGER NOT NULL, y INTEGER NOT NULL, z INTEGER NOT NULL, lx INTEGER NOT NULL, ly INTEGER NOT NULL, lz INTEGER NOT NULL);"\
+            "CREATE TABLE scene_node(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, material_id INTEGER, start_position INTEGER NOT NULL, end_position INTEGER NOT NULL, boundingSphere, lx INTEGER NOT NULL, ly INTEGER NOT NULL, lz INTEGER NOT NULL);"\
             "CREATE TABLE material(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, normal_texname TEXT, dissolve INTEGER, diffuse_r INTEGER, diffuse_g INTEGER, diffuse_b INTEGER, transmittance_r INTEGER, transmittance_g INTEGER, transmittance_b INTEGER, emission_r INTEGER, emission_g INTEGER, emission_b INTEGER, shininess INTEGER, specular_texname TEXT, specular_r INTEGER, specular_g INTEGER, specular_b INTEGER, diffuse_texname TEXT, ambient_r INTEGER, ambient_g INTEGER, ambient_b INTEGER, ior INTEGER, ambient_texname TEXT, illum INTEGER);" \
             "CREATE TABLE texture(name TEXT PRIMARY KEY NOT NULL, image BLOB NOT NULL);";
 
@@ -441,7 +438,7 @@ void SceneBuilder::saveToDB(const char* dbFile)
 
     for(size_t i=0; i<sceneNodes.size(); i++)
     {
-        string sceneNodeInsertSQL = "INSERT INTO scene_node(name, material_id, start_position, end_position, boundingSphere, x, y, z, lx, ly, lz) VALUES (";
+        string sceneNodeInsertSQL = "INSERT INTO scene_node(name, material_id, start_position, end_position, boundingSphere, lx, ly, lz) VALUES (";
         sceneNodeInsertSQL += "'" + sceneNodes.at(i).name + "'";
         sceneNodeInsertSQL += ",";
         sceneNodeInsertSQL += intToStr(getMaterialId(sceneNodes.at(i).material));
@@ -451,12 +448,6 @@ void SceneBuilder::saveToDB(const char* dbFile)
         sceneNodeInsertSQL += intToStr(sceneNodes.at(i).endPosition);
         sceneNodeInsertSQL += ",";
         sceneNodeInsertSQL += fToStr(sceneNodes.at(i).boundingSphere);
-        sceneNodeInsertSQL += ",";
-        sceneNodeInsertSQL += fToStr(sceneNodes.at(i).x);
-        sceneNodeInsertSQL += ",";
-        sceneNodeInsertSQL += fToStr(sceneNodes.at(i).y);
-        sceneNodeInsertSQL += ",";
-        sceneNodeInsertSQL += fToStr(sceneNodes.at(i).z);
         sceneNodeInsertSQL += ",";
         sceneNodeInsertSQL += fToStr(sceneNodes.at(i).lx);
         sceneNodeInsertSQL += ",";

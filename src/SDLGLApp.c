@@ -38,7 +38,7 @@ void SDLGLApp_init(SDLGLApp* app, const char* dbFileName) {
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
+		/* SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8); */
 
 		Renderer_init(&app->renderer, dbFileName);
 

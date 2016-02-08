@@ -358,12 +358,9 @@ void Renderer_buildScene(Renderer* renderer)
         sceneNode->startPosition = sqlite3_column_int(stmt, 3);
         sceneNode->endPosition = sqlite3_column_int(stmt, 4);
         sceneNode->boundingSphere = intToFloat(sqlite3_column_int(stmt, 5));
-        sceneNode->x = intToFloat(sqlite3_column_int(stmt, 6));
-        sceneNode->y = intToFloat(sqlite3_column_int(stmt, 7));
-        sceneNode->z = intToFloat(sqlite3_column_int(stmt, 8));
-        sceneNode->lx = intToFloat(sqlite3_column_int(stmt, 9));
-        sceneNode->ly = intToFloat(sqlite3_column_int(stmt, 10));
-        sceneNode->lz = intToFloat(sqlite3_column_int(stmt, 11));
+        sceneNode->lx = intToFloat(sqlite3_column_int(stmt, 6));
+        sceneNode->ly = intToFloat(sqlite3_column_int(stmt, 7));
+        sceneNode->lz = intToFloat(sqlite3_column_int(stmt, 8));
         sceneNode->diffuseTextureId = 0xffffffff;
         sceneNode->normalTextureId = 0xffffffff;
         sceneNode->specularTextureId = 0xffffffff;
@@ -540,7 +537,7 @@ void Renderer_render(Renderer* renderer, Camera* camera)
     for (i = 0; i < renderer->numSceneNodes; i++)
     {
         node = &renderer->sceneNodes[i];
-        assert(node->materialId <= renderer->numMaterials && node->materialId > 0);
+        //assert(node->materialId <= renderer->numMaterials && node->materialId > 0);
         material = &renderer->materials[node->materialId - 1];
         /* Only draw node if it is in the camera frustum */
         if(Frustum_spherePartiallyInFrustum(&camera->frustum, node->lx, node->ly, node->lz, node->boundingSphere) > 0)

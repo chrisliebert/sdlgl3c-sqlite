@@ -7,7 +7,7 @@
 
 #undef __cplusplus
 
-#define _DEBUG 1 /* TODO: integrate with cmake */
+#define _DEBUG 0 /* TODO: integrate with cmake */
 
 #ifdef _DEBUG
 #include <assert.h>

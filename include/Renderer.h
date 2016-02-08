@@ -47,7 +47,6 @@ typedef struct
     GLuint normalTextureId;
     GLuint specularTextureId;
     float boundingSphere;
-    float x, y, z;
     float lx, ly, lz;
 } SceneNode;
 
