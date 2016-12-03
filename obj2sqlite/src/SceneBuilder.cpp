@@ -1,6 +1,8 @@
 #include "SceneBuilder.h"
 #include "sqlite3.h"
 
+#define MAX_NAME_LENGTH 128
+
 SceneBuilder::SceneBuilder()
 {
     startPosition = 0;
@@ -105,11 +107,11 @@ void SceneBuilder::addWavefront(const char* fileName, glm::mat4 matrix)
         memcpy((void*)& m.ior, (void*)& materials[i].ior, sizeof(float));
         memcpy((void*)& m.shininess, (void*)& materials[i].shininess, sizeof(float));
         memcpy((void*)& m.dissolve, (void*)& materials[i].dissolve, sizeof(float));
-        strcpy(m.name, materials[i].name.c_str());
-        strcpy(m.ambientTexName, materials[i].ambient_texname.c_str());
-        strcpy(m.diffuseTexName, materials[i].diffuse_texname.c_str());
-        strcpy(m.normalTexName, materials[i].normal_texname.c_str());
-        strcpy(m.specularTexName, materials[i].specular_texname.c_str());
+        strncpy(m.name, materials[i].name.c_str(), MAX_NAME_LENGTH);
+        strncpy(m.ambientTexName, materials[i].ambient_texname.c_str(), MAX_NAME_LENGTH);
+        strncpy(m.diffuseTexName, materials[i].diffuse_texname.c_str(), MAX_NAME_LENGTH);
+        strncpy(m.normalTexName, materials[i].normal_texname.c_str(), MAX_NAME_LENGTH);
+        strncpy(m.specularTexName, materials[i].specular_texname.c_str(), MAX_NAME_LENGTH);
         addMaterial(&m);
     }
 

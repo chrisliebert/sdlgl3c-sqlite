@@ -66,10 +66,10 @@
     #pragma warning Unknown dynamic link import/export semantics.
 #endif
 
-#define Log(A)				printf(A);
+#define Log(A)				printf("%s", A);
 #define Logf(A,...)         printf(A,##__VA_ARGS__);
 
-#define Log_error(A)        fprintf(stderr,A);
+#define Log_error(A)        fprintf(stderr,"%s", A);
 #define Log_errorf(A,...)   fprintf(stderr,A,##__VA_ARGS__);
 
 #endif /* _COMMON_H_ */

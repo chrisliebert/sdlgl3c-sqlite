@@ -14,9 +14,11 @@ void _checkForGLError(const char *file, int line);
 #define checkForGLError() (void)0
 #endif
 
+#define MAX_NAME_LENGTH 128
+
 typedef struct
 {
-    char name[64];
+    char name[MAX_NAME_LENGTH];
     float ambient[3];
     float diffuse[3];
     float specular[3];
@@ -28,15 +30,15 @@ typedef struct
     /* illumination model (see http://www.fileformat.info/format/material/) */
     int illum;
     /* Texture file names */
-    char ambientTextureName[64];
-    char diffuseTextureName[64];
-    char specularTextureName[64];
-    char normalTextureName[64];
+    char ambientTextureName[MAX_NAME_LENGTH];
+    char diffuseTextureName[MAX_NAME_LENGTH];
+    char specularTextureName[MAX_NAME_LENGTH];
+    char normalTextureName[MAX_NAME_LENGTH];
 } Material;
 
 typedef struct
 {
-    char name[64];
+    char name[MAX_NAME_LENGTH];
     int materialId;
     Matrix modelViewMatrix;
     GLuint startPosition;

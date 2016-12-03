@@ -50,7 +50,7 @@ void Renderer_init(Renderer* renderer, const char* dbFileName)
     renderer->dbFileName = malloc((strlen(dbFileName) + 1) * sizeof(char));
     assert(renderer->dbFileName);
     renderer->dbFileName[0] = '\0';
-    strcpy(renderer->dbFileName, dbFileName);
+    strncpy(renderer->dbFileName, dbFileName, MAX_NAME_LENGTH);
     renderer->useFixedFunctionLegacyMode = false;
 }
 
@@ -301,8 +301,8 @@ void Renderer_buildScene(Renderer* renderer)
         m = &renderer->materials[i];
         assert(m);
 
-        strcpy(m->name, (char*) sqlite3_column_text(stmt, 1));
-        strcpy(m->normalTextureName, (char*) sqlite3_column_text(stmt, 2));
+        strncpy(m->name, (char*) sqlite3_column_text(stmt, 1), MAX_NAME_LENGTH);
+        strncpy(m->normalTextureName, (char*) sqlite3_column_text(stmt, 2), MAX_NAME_LENGTH);
         m->dissolve = intToFloat(sqlite3_column_int(stmt, 3));
         m->diffuse[0] = intToFloat(sqlite3_column_int(stmt, 4));
         m->diffuse[1] = intToFloat(sqlite3_column_int(stmt, 5));
@@ -312,15 +312,15 @@ void Renderer_buildScene(Renderer* renderer)
         m->emission[1] = intToFloat(sqlite3_column_int(stmt, 11));
         m->emission[2] = intToFloat(sqlite3_column_int(stmt, 12));
 
-        strcpy(m->specularTextureName, (char*) sqlite3_column_text(stmt, 14));
+        strncpy(m->specularTextureName, (char*) sqlite3_column_text(stmt, 14), MAX_NAME_LENGTH);
         m->specular[0] = intToFloat(sqlite3_column_int(stmt, 15));
         m->specular[1] = intToFloat(sqlite3_column_int(stmt, 16));
         m->specular[2] = intToFloat(sqlite3_column_int(stmt, 17));
-        strcpy(m->diffuseTextureName, (char*) sqlite3_column_text(stmt, 18));
+        strncpy(m->diffuseTextureName, (char*) sqlite3_column_text(stmt, 18), MAX_NAME_LENGTH);
         m->ambient[0] = intToFloat(sqlite3_column_int(stmt, 19));
         m->ambient[1] = intToFloat(sqlite3_column_int(stmt, 20));
         m->ambient[2] = intToFloat(sqlite3_column_int(stmt, 21));
-        strcpy(m->ambientTextureName, (char*) sqlite3_column_text(stmt, 22));
+        strncpy(m->ambientTextureName, (char*) sqlite3_column_text(stmt, 22), MAX_NAME_LENGTH);
         i++;
     }
 
@@ -353,7 +353,7 @@ void Renderer_buildScene(Renderer* renderer)
 
         sceneNode = &renderer->sceneNodes[i];
         assert(sceneNode);
-        strcpy(sceneNode->name, (char*) sqlite3_column_text(stmt, 1));
+        strncpy(sceneNode->name, (char*) sqlite3_column_text(stmt, 1), MAX_NAME_LENGTH);
         sceneNode->materialId = sqlite3_column_int(stmt, 2);
         sceneNode->startPosition = sqlite3_column_int(stmt, 3);
         sceneNode->endPosition = sqlite3_column_int(stmt, 4);
